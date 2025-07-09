@@ -41,7 +41,11 @@ int main(void)
     while (1);
 }
 
+
 #if (configCHECK_FOR_STACK_OVERFLOW)
+/**
+ * @brief 栈溢出钩子函数。输出栈溢出任务信息。
+ */
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
 {
     /* 全局变量用于记录栈溢出任务信息 */
