@@ -4,6 +4,7 @@
 #include "stdbool.h"
 #include "task.h"
 #include <stdio.h>
+#include "log.h"
 
 #include "utilities/macro.h"
 
@@ -82,7 +83,7 @@ void console_tx_dma_config(void)
     /* initialize DMA channel 0 */
     dma_deinit(DMA0, DMA_CH0);
     dma_single_data_para_struct_init(&dma_init_struct);
-    dma_init_struct.request = DMA_REQUEST_USART1_TX;
+    dma_init_struct.request = CONSOLE_DMA_TX_REQUEST;
     dma_init_struct.direction = DMA_MEMORY_TO_PERIPH;
     dma_init_struct.memory0_addr = (uint32_t) tx_buffer;
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
@@ -116,7 +117,7 @@ void console_rx_dma_config(void)
     dma_deinit(DMA0, DMA_CH1);
 
     dma_single_data_para_struct_init(&dma_init_struct);
-    dma_init_struct.request = DMA_REQUEST_USART1_RX;
+    dma_init_struct.request = CONSOLE_DMA_RX_REQUEST;
     dma_init_struct.direction = DMA_PERIPH_TO_MEMORY;
     dma_init_struct.memory0_addr = (uint32_t) rx_buffer;
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
@@ -228,7 +229,7 @@ void console_test(void* pvParameters)
             data, CONSOLE_RING_BUFFER_RX_SIZE, 100);
         if (ret == -1)
         {
-            printf("console rx ring buffer read timeout\n\r");
+            Log_info("console rx ring buffer read timeout");
         }
         else if (ret > 0)
         {
@@ -236,7 +237,7 @@ void console_test(void* pvParameters)
         }
 
         vTaskDelay(pdMS_TO_TICKS(1000));
-        printf("console echo 已经启动\n\r");
+        Log_info("console echo 已经启动");
     }
 }
 #endif

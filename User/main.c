@@ -4,10 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include "logging_stack.h"
-
-#define TAG "main"
-#define LOG_LEVEL LOG_DEBUG
+#include "log.h"
 
 task_info_t task_info_all[] = {{console_task, NAME_debug_task, STACK_debug_task,
                                 PARAM_debug_task, PRIORITY_debug_task, NULL}};
@@ -30,15 +27,7 @@ int main(void)
 
     nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
 
-	//console_tx_task运行后，才会使用dam+ring_buff发送。
-	//在此之前是直接把数据放入uart发送寄存器。且无法接收数据。 
 	console_init();
-
-	LogAlways(("main start\n"));
-	LogInfo(("main start\n"));
-	LogError(("main start\n"));
-	LogWarn(("main start\n"));
-	LogDebug(("main start\n"));
 
     for (int i = 0; i < TASK_NUM; i++)
     {
@@ -47,6 +36,7 @@ int main(void)
                     task_info_all[i].uxPriority,
                     task_info_all[i].pxCreatedTask);
     }
+    Log_info("系统初始化完成");
     vTaskStartScheduler();
     while (1);
 }
