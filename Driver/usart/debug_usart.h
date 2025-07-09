@@ -1,5 +1,4 @@
-#ifndef __USART_H
-#define	__USART_H
+#pragma once
 
 
 #include "gd32h7xx.h"
@@ -21,10 +20,9 @@
 #define  DEBUG_USART_RX_GPIO_PIN        GPIO_PIN_6
 #define  DEBUG_USART_TX_RX_GPIO_AF      GPIO_AF_7
 
-#define  DEBUG_USART_IRQ                USART1_IRQn
-#define  DEBUG_USART_IRQHANDLER         USART1_IRQHandler
+#define DEBUG_RX_BUFFER_SIZE 20
+#define DEBUG_TX_BUFFER_SIZE 200
 
-void uart1_init(void);
-void debug_usart_init(void);
-void uart1_dma_config(void);
-#endif
+
+void debug_task(void* pvParameters);
+

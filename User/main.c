@@ -1,8 +1,13 @@
 #include "gd32h7xx.h"
 #include "usart/debug_usart.h"
-#include "FreeRTOS.h"
-#include "task.h"
+#include "main.h"
 #include <stdio.h>
+
+task_info_t task_info_all[] = {
+    {debug_task, NAME_debug_task, STACK_debug_task, PARAM_debug_task, PRIORITY_debug_task, NULL}
+};
+
+#define TASK_NUM (sizeof(task_info_all) / sizeof(task_info_t))
 
 void vTask1(void *pvParameters)
 {
@@ -20,11 +25,17 @@ int main(void)
 
 	nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
 
-	debug_usart_init();
-
 	printf("你好\n");
 
-	xTaskCreate(vTask1, "Task1", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
+	for(int i = 0; i < TASK_NUM; i++)
+	{
+		xTaskCreate(task_info_all[i].pxTaskCode, 
+            task_info_all[i].pcName, 
+            task_info_all[i].uxStackDepth, 
+            &task_info_all[i].time, 
+            task_info_all[i].uxPriority, 
+            task_info_all[i].pxCreatedTask);
+	}
 	vTaskStartScheduler();
 	while(1);
 }
