@@ -40,7 +40,7 @@ void DEBUG_USART_Config(void)
 
 
 /**
- * @brief  ÖØ¶¨ÏòprintfÊä³öµ½´®¿Ú
+ * @brief  é‡å®šå‘printfè¾“å‡ºåˆ°ä¸²å£
  */
 int fputc(int ch, FILE *f) 
 {
@@ -52,7 +52,7 @@ int fputc(int ch, FILE *f)
 }
 
 /**
- * @brief  ÖØ¶¨ÏòscanfÊäÈëµ½´®¿Ú
+ * @brief  é‡å®šå‘scanfè¾“å…¥åˆ°ä¸²å£
  */
 int fgetc(FILE *f) 
 {
