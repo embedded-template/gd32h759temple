@@ -5,11 +5,11 @@
 typedef struct task_info_t
 {
     TaskFunction_t pxTaskCode;
-    const char * const pcName;
+    const char* const pcName;
     const configSTACK_DEPTH_TYPE uxStackDepth;
     uint32_t time;
     UBaseType_t uxPriority;
-    TaskHandle_t * const pxCreatedTask;
+    TaskHandle_t* const pxCreatedTask;
 } task_info_t;
 
 #define NAME_debug_task "test"
