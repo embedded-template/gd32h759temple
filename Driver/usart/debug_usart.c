@@ -1,6 +1,6 @@
-
 #include "debug_usart.h"
 #include "FreeRtos.h"
+#include "driver_test_config.h"
 #include "stdbool.h"
 #include "task.h"
 #include <stdio.h>
@@ -14,6 +14,11 @@ RING_BUFF_PRE_INIT(console_rx, CONSOLE_RING_BUFFER_RX_SIZE);
 RING_BUFF_PRE_INIT(console_tx, CONSOLE_RING_BUFFER_TX_SIZE);
 
 console_t console = {0};
+
+console_t* get_console(void)
+{
+    return &console;
+}
 
 /**
  * @brief 串口 初始化。
@@ -62,7 +67,10 @@ void console_uart_init(void)
 
     usart_enable(CONSOLE_USARTX);
 }
-
+/**
+ * @brief 设置console发送DMA，每次发送完都需要重新设置
+ *
+ */
 void console_tx_dma_config(void)
 {
     dma_single_data_parameter_struct dma_init_struct;
@@ -91,16 +99,17 @@ void console_tx_dma_config(void)
     dma_channel_enable(DMA0, DMA_CH0);
 
     /* USART DMA enable for transmission */
-    usart_dma_transmit_config(USART1, USART_TRANSMIT_DMA_ENABLE);
+    usart_dma_transmit_config(CONSOLE_USARTX, USART_TRANSMIT_DMA_ENABLE);
 
     /* 启用 DMA 传输完成中断 */
     dma_interrupt_enable(DMA0, DMA_CH0, DMA_CHXCTL_FTFIE);
     nvic_irq_enable(DMA0_Channel0_IRQn, 2u, 0);
 }
-u
-
-    void
-    console_rx_dma_config(void)
+/**
+ * @brief 设置console接收DMA。每次接收完都要重新设置
+ *
+ */
+void console_rx_dma_config(void)
 {
 
     dma_single_data_parameter_struct dma_init_struct;
@@ -123,13 +132,16 @@ u
     /* enable DMA channel 1 */
     dma_channel_enable(DMA0, DMA_CH1);
     /* USART DMA enable for reception */
-    usart_dma_receive_config(USART1, USART_RECEIVE_DMA_ENABLE);
+    usart_dma_receive_config(CONSOLE_USARTX, USART_RECEIVE_DMA_ENABLE);
 
     /* 启用 DMA 接收完成中断 */
     dma_interrupt_enable(DMA0, DMA_CH1, DMA_INT_FTF);
     nvic_irq_enable(DMA0_Channel1_IRQn, 2, 0);
 }
-
+/**
+ * @brief console初始化
+ *
+ */
 void console_init(void)
 {
     console.rx_ring_buffer = console_rx_ring_buff();
@@ -141,10 +153,12 @@ void console_init(void)
     console_tx_dma_config();
     console_rx_dma_config();
 }
-
+/**
+ * @brief console接收任务
+ *
+ */
 void console_rx_task(void* pvParameters)
 {
-    printf("console rx task 创建成功\n\r");
     while (1)
     {
         if (console.rx_dma_buffer.size != 0)
@@ -167,16 +181,17 @@ void console_rx_task(void* pvParameters)
             }
             console_rx_dma_config();
             SCB_InvalidateDCache_by_Addr(
-                (uint32_t*) console.rx_dma_buffer.buffer,
-                CONSOLE_DMA_BUFFER_RX_SIZE);
+                (uint32_t*) console.rx_dma_buffer.buffer, ret);
         }
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
-
+/**
+ * @brief console发送任务
+ *
+ */
 void console_tx_task(void* pvParameters)
 {
-    printf("console tx task 创建成功\n\r");
     while (1)
     {
         if (!console.tx_ring_buffer->is_empty())
@@ -199,10 +214,13 @@ void console_tx_task(void* pvParameters)
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
-
+#ifdef CONSOLE_TEST
+/**
+ * @brief console 测试任务
+ *
+ */
 void console_test(void* pvParameters)
 {
-    printf("console test task 创建成功\n\r");
     uint8_t data[CONSOLE_RING_BUFFER_RX_SIZE] = {0};
     while (1)
     {
@@ -212,30 +230,16 @@ void console_test(void* pvParameters)
         {
             printf("console rx ring buffer read timeout\n\r");
         }
-        else if (ret == 0)
-        {
-            // printf("console rx ring buffer empty\n\r");
-        }
         else if (ret > 0)
         {
             console.tx_ring_buffer->write(data, ret, 100);
         }
 
         vTaskDelay(pdMS_TO_TICKS(1000));
-        printf("console test task running\n\r");
+        printf("console echo 已经启动\n\r");
     }
 }
-
-void console_task(void* pvParameters)
-{
-    console_init();
-    xTaskCreate(console_rx_task, "console_rx", 20, NULL, 5, NULL);
-    xTaskCreate(console_tx_task, "console_tx", 20, NULL, 5, NULL);
-    xTaskCreate(console_test, "console_test", 20, NULL, 5, NULL);
-
-    vTaskDelete(NULL);
-}
-
+#endif
 /**
  * @brief  重定向printf输出到串口
  */
@@ -255,7 +259,6 @@ int fputc(int ch, FILE* f)
     }
     return ch;
 }
-
 /**
  * @brief  重定向scanf输入到串口
  */
@@ -264,13 +267,10 @@ int fgetc(FILE* f)
     while (RESET == usart_flag_get(CONSOLE_USARTX, USART_FLAG_RBNE));
     return (int) usart_data_receive(CONSOLE_USARTX);
 }
-
-/*!
-    \brief      this function handles DMA_Channel0_IRQHandler exception
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
+/**
+ * @brief DMA发送完成中断。
+ *
+ */
 void DMA0_Channel0_IRQHandler(void)
 {
     if (RESET != dma_interrupt_flag_get(DMA0, DMA_CH0, DMA_INT_FLAG_FTF))
@@ -279,13 +279,10 @@ void DMA0_Channel0_IRQHandler(void)
         console.tx_dma_buffer.size = 0;
     }
 }
-
-/*!
-    \brief      this function handles DMA_Channel1_IRQHandler exception
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
+/**
+ * @brief DMA接收完成中断。
+ *
+ */
 void DMA0_Channel1_IRQHandler(void)
 {
     if (RESET != dma_interrupt_flag_get(DMA0, DMA_CH1, DMA_INT_FLAG_FTF))
@@ -293,7 +290,6 @@ void DMA0_Channel1_IRQHandler(void)
         dma_interrupt_flag_clear(DMA0, DMA_CH1, DMA_INT_FLAG_FTF);
     }
 }
-
 /**
  * @brief 第一次收到数据后，开启接收超时中断。用以判断接收结束。
  *
@@ -318,9 +314,34 @@ void CONSOLE_USART_IRQ_HANDLER(void)
         console.rx_dma_buffer.size =
             CONSOLE_DMA_BUFFER_RX_SIZE - dma_transfer_number_get(DMA0, DMA_CH1);
 
-        // 禁用接收超时，直到下一个数据包开始
-        usart_interrupt_disable(CONSOLE_USARTX, USART_INT_RT);
-        // 启用接收数据非空中断，等待下一次数据的到来
-        usart_interrupt_enable(CONSOLE_USARTX, USART_INT_RBNE);
+        if (usart_interrupt_flag_get(CONSOLE_USARTX, USART_INT_FLAG_RT) == SET)
+        {
+            // 清除接收超时中断标志
+            usart_interrupt_flag_clear(CONSOLE_USARTX, USART_INT_FLAG_RT);
+
+            console.rx_dma_buffer.size = CONSOLE_DMA_BUFFER_RX_SIZE -
+                                         dma_transfer_number_get(DMA0, DMA_CH1);
+
+            // 禁用接收超时，直到下一个数据包开始
+            usart_interrupt_disable(CONSOLE_USARTX, USART_INT_RT);
+            // 启用接收数据非空中断，等待下一次数据的到来
+            usart_interrupt_enable(CONSOLE_USARTX, USART_INT_RBNE);
+        }
     }
+}
+/**
+ * @brief console任务
+ *
+ */
+void console_task(void* pvParameters)
+{
+    console_init();
+    xTaskCreate(console_rx_task, "console_rx", 50, NULL, 5, NULL);
+    xTaskCreate(console_tx_task, "console_tx", 50, NULL, 5, NULL);
+
+#ifdef CONSOLE_TEST
+    xTaskCreate(console_test, "console_test", 200, NULL, 5, NULL);
+#endif
+
+    vTaskDelete(NULL);
 }

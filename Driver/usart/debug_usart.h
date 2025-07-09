@@ -47,3 +47,4 @@ typedef struct console_t
 } console_t;
 
 void console_task(void* pvParameters);
+console_t* get_console(void);

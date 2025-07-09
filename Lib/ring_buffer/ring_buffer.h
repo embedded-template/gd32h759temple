@@ -1,7 +1,7 @@
 /**
  * @file ring_buff.h
  * @brief 环形缓冲区库
- * @author
+ * @author anlang
  * @date
  * @version 1.0
  */
@@ -13,6 +13,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+
+/**
+ * @brief 重定义malloc和free函数
+ */
+#define free(x) vPortFree(x)
+#define malloc(x) pvPortMalloc(x)
 
 /**
  * @brief 环形缓冲区结构体前向声明
@@ -109,15 +115,15 @@ typedef struct ring_buff_t
             {                                                                  \
                 break;                                                         \
             }                                                                  \
-            rb = (ring_buff_t*) pvPortMalloc(sizeof(ring_buff_t));             \
+            rb = (ring_buff_t*) malloc(sizeof(ring_buff_t));                   \
             if (rb == NULL)                                                    \
             {                                                                  \
                 break;                                                         \
             }                                                                  \
-            rb->p_buff = (uint8_t*) pvPortMalloc(size);                        \
+            rb->p_buff = (uint8_t*) malloc(size);                              \
             if (rb->p_buff == NULL)                                            \
             {                                                                  \
-                vPortFree(rb);                                                 \
+                free(rb);                                                      \
                 rb = NULL;                                                     \
                 break;                                                         \
             }                                                                  \
@@ -128,8 +134,8 @@ typedef struct ring_buff_t
                 if (rb->read_mutex != NULL) vSemaphoreDelete(rb->read_mutex);  \
                 if (rb->write_mutex != NULL)                                   \
                     vSemaphoreDelete(rb->write_mutex);                         \
-                vPortFree(rb->p_buff);                                         \
-                vPortFree(rb);                                                 \
+                free(rb->p_buff);                                              \
+                free(rb);                                                      \
                 rb = NULL;                                                     \
                 break;                                                         \
             }                                                                  \
@@ -375,7 +381,7 @@ typedef struct ring_buff_t
         {                                                                      \
             if (rb->p_buff)                                                    \
             {                                                                  \
-                vPortFree(rb->p_buff);                                         \
+                free(rb->p_buff);                                              \
                 rb->p_buff = NULL;                                             \
             }                                                                  \
             if (rb->read_mutex)                                                \
@@ -404,7 +410,7 @@ typedef struct ring_buff_t
             return rb;                                                         \
         }                                                                      \
                                                                                \
-        rb->p_buff = (uint8_t*) pvPortMalloc(buff_size);                       \
+        rb->p_buff = (uint8_t*) malloc(buff_size);                             \
         if (rb->p_buff == NULL)                                                \
         {                                                                      \
             return NULL;                                                       \
@@ -416,7 +422,7 @@ typedef struct ring_buff_t
         {                                                                      \
             if (rb->read_mutex != NULL) vSemaphoreDelete(rb->read_mutex);      \
             if (rb->write_mutex != NULL) vSemaphoreDelete(rb->write_mutex);    \
-            vPortFree(rb->p_buff);                                             \
+            free(rb->p_buff);                                                  \
             rb->p_buff = NULL;                                                 \
             return NULL;                                                       \
         }                                                                      \

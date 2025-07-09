@@ -1,7 +1,9 @@
 #include "main.h"
 #include "gd32h7xx.h"
 #include "usart/debug_usart.h"
+#include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 task_info_t task_info_all[] = {{console_task, NAME_debug_task, STACK_debug_task,
                                 PARAM_debug_task, PRIORITY_debug_task, NULL}};
@@ -38,8 +40,41 @@ int main(void)
 #if (configCHECK_FOR_STACK_OVERFLOW)
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
 {
+    /* 全局变量用于记录栈溢出任务信息 */
+    volatile TaskHandle_t g_overflow_task_handle = NULL;
+    volatile char g_overflow_task_name[configMAX_TASK_NAME_LEN] = {0};
+    volatile uint32_t g_stack_overflow_count = 0;
+
+    /* 记录出错任务的句柄 */
+    g_overflow_task_handle = xTask;
+
+    /* 记录出错任务的名称 */
+    if (pcTaskName != NULL)
+    {
+        strncpy((char*) g_overflow_task_name, pcTaskName,
+                configMAX_TASK_NAME_LEN - 1);
+        g_overflow_task_name[configMAX_TASK_NAME_LEN - 1] =
+            '\0'; /* 确保字符串结束 */
+    }
+    else
+    {
+        strcpy((char*) g_overflow_task_name, "Unknown");
+    }
+
+    /* 增加栈溢出计数 */
+    g_stack_overflow_count++;
+
+    /* 输出错误信息 */
+    console_t* console = get_console();
+    console->bReady = false;
+    printf("任务:%s stack 溢出, task handle: 0x%08lX, Count: %d\r\n",
+           (char*) g_overflow_task_name, (unsigned long) g_overflow_task_handle,
+           g_stack_overflow_count);
+
+    /* 进入死循环，防止系统继续运行 */
     for (;;)
     {
+        /* 可以在这里添加LED闪烁等指示代码 */
     }
 }
 #endif
