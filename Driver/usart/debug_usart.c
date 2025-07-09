@@ -335,7 +335,6 @@ void CONSOLE_USART_IRQ_HANDLER(void)
  */
 void console_task(void* pvParameters)
 {
-    console_init();
     xTaskCreate(console_rx_task, "console_rx", 50, NULL, 5, NULL);
     xTaskCreate(console_tx_task, "console_tx", 50, NULL, 5, NULL);
 

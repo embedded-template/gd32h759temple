@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gd32h7xx.h"
-#include "ring_buffer/ring_buffer.h"
+#include "ring_buffer.h"
 #include <stdio.h>
 
 #define CONSOLE_USARTX_MODE 0
@@ -47,4 +47,5 @@ typedef struct console_t
 } console_t;
 
 void console_task(void* pvParameters);
+void console_init(void);
 console_t* get_console(void);
