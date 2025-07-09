@@ -23,7 +23,7 @@ console_t console = {0};
  * 设置接收超时中断，用于获取本次dma接收的数据长度
  * 
  */
-void uart1_init(void)
+void console_uart_init(void)
 {
     rcu_periph_clock_enable(CONSOLE_USART_GPIO_CLK_TX);
     rcu_periph_clock_enable(CONSOLE_USART_GPIO_CLK_RX);
@@ -54,13 +54,13 @@ void uart1_init(void)
     usart_receiver_timeout_enable(CONSOLE_USARTX);
     usart_receiver_timeout_threshold_config(CONSOLE_USARTX, 100);
 
-    nvic_irq_enable(CONSOLE_USART_IRQ, 1U, 1U);
+    nvic_irq_enable(CONSOLE_USART_IRQ, 1U, 0U);
 
     usart_enable(CONSOLE_USARTX);
 
 }
 
-void uart1_tx_dma_config(void){
+void console_tx_dma_config(void){
     dma_single_data_parameter_struct dma_init_struct;
     /* enable DMA clock */
     rcu_periph_clock_enable(RCU_DMA0);
@@ -91,11 +91,11 @@ void uart1_tx_dma_config(void){
 
     /* 启用 DMA 传输完成中断 */
     dma_interrupt_enable(DMA0, DMA_CH0, DMA_CHXCTL_FTFIE);
-    nvic_irq_enable(DMA0_Channel0_IRQn, 2, 0);
-}
+    nvic_irq_enable(DMA0_Channel0_IRQn, 2u, 0);
+}u
 
 
-void uart1_rx_dma_config(void) {
+void console_rx_dma_config(void) {
 
     dma_single_data_parameter_struct dma_init_struct;
     dma_deinit(DMA0, DMA_CH1);
@@ -131,12 +131,12 @@ void console_init(void)
     console.rx_dma_buffer.buffer = rx_buffer;
     console.tx_dma_buffer.buffer = tx_buffer;
     console.bReady = true;
-    uart1_init();
-    uart1_tx_dma_config();
-    uart1_rx_dma_config();
+    console_uart_init();
+    console_tx_dma_config();
+    console_rx_dma_config();
 }
 
-void console_rx(void* pvParameters)
+void console_rx_task(void* pvParameters)
 {
     printf("console rx task 创建成功\n\r");
     while(1) {        
@@ -156,14 +156,14 @@ void console_rx(void* pvParameters)
             {
                 printf("console rx ring buffer write timeout\n\r");
             }
-            uart1_rx_dma_config();
+            console_rx_dma_config();
             SCB_InvalidateDCache_by_Addr((uint32_t*)console.rx_dma_buffer.buffer, CONSOLE_DMA_BUFFER_RX_SIZE);
         }
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
-void console_tx(void* pvParameters)
+void console_tx_task(void* pvParameters)
 {
     printf("console tx task 创建成功\n\r");
     while(1) {
@@ -176,7 +176,7 @@ void console_tx(void* pvParameters)
                     console.tx_dma_buffer.size = ret;
                     // 确保 DMA 能看到最新数据
                     SCB_CleanDCache_by_Addr((uint32_t*)console.tx_dma_buffer.buffer, ret);
-                    uart1_tx_dma_config();
+                    console_tx_dma_config();
                 }
             }
         }
@@ -209,9 +209,9 @@ void console_test(void* pvParameters)
 void console_task(void* pvParameters)
 {
     console_init();
-    xTaskCreate(console_rx, "console_rx", 1024, NULL, 5, NULL);
-    xTaskCreate(console_tx, "console_tx", 1024, NULL, 5, NULL);
-    xTaskCreate(console_test, "console_test", 1024, NULL, 5, NULL);
+    xTaskCreate(console_rx_task, "console_rx", 20, NULL, 5, NULL);
+    xTaskCreate(console_tx_task, "console_tx", 20, NULL, 5, NULL);
+    xTaskCreate(console_test, "console_test", 20, NULL, 5, NULL);
 
     vTaskDelete( NULL );
 }
@@ -221,12 +221,15 @@ void console_task(void* pvParameters)
  */
 int fputc(int ch, FILE *f) 
 {
+    //多种输出样式，后续可以选择输出到文件中
     if(console.bReady)
     {
+        //使用环形缓冲区 dam输出
         console.tx_ring_buffer->write((uint8_t*)&ch, 1, 100);
     }
     else
     {
+        //直接输出
         usart_data_transmit(CONSOLE_USARTX, (uint8_t)ch);
         while (RESET == usart_flag_get(CONSOLE_USARTX, USART_FLAG_TBE))
             ;
@@ -272,7 +275,10 @@ void DMA0_Channel1_IRQHandler(void)
 }
 
 
-
+/**
+ * @brief 第一次收到数据后，开启接收超时中断。用以判断接收结束。
+ * 
+ */
 void CONSOLE_USART_IRQ_HANDLER(void)
 {
     //如果接收超时中断没有启用
@@ -288,13 +294,12 @@ void CONSOLE_USART_IRQ_HANDLER(void)
     if(usart_interrupt_flag_get(CONSOLE_USARTX, USART_INT_FLAG_RT) == SET) {
         // 清除接收超时中断标志
         usart_interrupt_flag_clear(CONSOLE_USARTX, USART_INT_FLAG_RT);
-        
-        //获取dma0 channel 1 的cnt寄存器的值
 
         console.rx_dma_buffer.size = CONSOLE_DMA_BUFFER_RX_SIZE - dma_transfer_number_get(DMA0, DMA_CH1);
-        // 可选：暂时禁用接收超时，直到下一个数据包开始
+        
+        // 禁用接收超时，直到下一个数据包开始
         usart_interrupt_disable(CONSOLE_USARTX, USART_INT_RT);
-        // 启用接收数据非空中断
+        // 启用接收数据非空中断，等待下一次数据的到来
         usart_interrupt_enable(CONSOLE_USARTX, USART_INT_RBNE);
     }
 }
