@@ -20,7 +20,7 @@ int main(void)
 
 	nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
 
-	DEBUG_USART_Config();
+	debug_usart_init();
 
 	printf("你好\n");
 

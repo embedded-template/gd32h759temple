@@ -24,7 +24,7 @@
 #define  DEBUG_USART_IRQ                USART1_IRQn
 #define  DEBUG_USART_IRQHANDLER         USART1_IRQHandler
 
-
-void DEBUG_USART_Config(void);
-
+void uart1_init(void);
+void debug_usart_init(void);
+void uart1_dma_config(void);
 #endif

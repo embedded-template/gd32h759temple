@@ -1,10 +1,25 @@
 
 #include "debug_usart.h"
+#include <stdio.h>
+#include "stdbool.h"
 
+FlagStatus g_transfer_complete;
 
-void DEBUG_USART_Config(void)
+__attribute__ ((aligned(32))) uint8_t rxbuffer[10];
+__attribute__ ((aligned(32))) uint8_t txbuffer[] = "\n\rUSART DMA receive and transmit example, please input 10 bytes:\n\r";
+#define ARRAYNUM(arr_nanme)       (uint32_t)(sizeof(arr_nanme) / sizeof(*(arr_nanme)))
+#define USART1_TDATA_ADDRESS      (&USART_TDATA(USART1))
+#define USART1_RDATA_ADDRESS      (&USART_RDATA(USART1))
+
+uint8_t readcount = 0;
+void debug_usart_init(void)
 {
+    uart1_init();
+    uart1_dma_config();
+}
 
+void uart1_init(void)
+{
     rcu_periph_clock_enable(DEBUG_USART_GPIO_CLK_TX);
     rcu_periph_clock_enable(DEBUG_USART_GPIO_CLK_RX);
     rcu_periph_clock_enable(DEBUG_USART_CLK);
@@ -31,13 +46,82 @@ void DEBUG_USART_Config(void)
     usart_receive_config(DEBUG_USARTX, USART_RECEIVE_ENABLE);
     usart_transmit_config(DEBUG_USARTX, USART_TRANSMIT_ENABLE);
 
-    //nvic_irq_enable(DEBUG_USART_IRQ, 1U, 1U);
+    nvic_irq_enable(DEBUG_USART_IRQ, 1U, 1U);
 
     usart_enable(DEBUG_USARTX);
 
-    //usart_interrupt_enable(DEBUG_USARTX, USART_INT_RBNE);
+    usart_interrupt_enable(DEBUG_USARTX, USART_INT_RBNE);
+    usart_receiver_timeout_enable(DEBUG_USARTX);
+    usart_receiver_timeout_threshold_config(USART1, 100);
 }
 
+
+void uart1_dma_config(void)
+{
+    dma_single_data_parameter_struct dma_init_struct;
+    /* enable DMA clock */
+    rcu_periph_clock_enable(RCU_DMA0);
+    /* enable DMAMUX clock */
+    rcu_periph_clock_enable(RCU_DMAMUX);
+
+    printf("\n\ra usart dma function test example!\n\r");
+
+    /* initialize DMA channel 0 */
+    dma_deinit(DMA0, DMA_CH0);
+    dma_single_data_para_struct_init(&dma_init_struct);
+    dma_init_struct.request      = DMA_REQUEST_USART1_TX;
+    dma_init_struct.direction    = DMA_MEMORY_TO_PERIPH;
+    dma_init_struct.memory0_addr  = (uint32_t)txbuffer;
+    dma_init_struct.memory_inc   = DMA_MEMORY_INCREASE_ENABLE;
+    dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
+    dma_init_struct.number       = ARRAYNUM(txbuffer);
+    dma_init_struct.periph_addr  = (uint32_t)USART1_TDATA_ADDRESS;
+    dma_init_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
+    dma_init_struct.priority     = DMA_PRIORITY_ULTRA_HIGH;
+    dma_single_data_mode_init(DMA0, DMA_CH0, &dma_init_struct);
+
+    /* configure DMA mode */
+    dma_circulation_disable(DMA0, DMA_CH0);
+    /* enable DMA channel 0 */
+    dma_channel_enable(DMA0, DMA_CH0);
+
+    /* USART DMA enable for transmission */
+    usart_dma_transmit_config(USART1, USART_TRANSMIT_DMA_ENABLE);
+
+    /* wait DMA Channel transfer complete */
+    while(RESET == dma_flag_get(DMA0, DMA_CH0, DMA_FLAG_FTF)) {
+    }
+
+    while(1) {
+        /* initialize DMA channel 1 */
+        dma_deinit(DMA0, DMA_CH1);
+        dma_single_data_para_struct_init(&dma_init_struct);
+        dma_init_struct.request      = DMA_REQUEST_USART1_RX;
+        dma_init_struct.direction    = DMA_PERIPH_TO_MEMORY;
+        dma_init_struct.memory0_addr  = (uint32_t)rxbuffer;
+        dma_init_struct.memory_inc   = DMA_MEMORY_INCREASE_ENABLE;
+        dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
+        dma_init_struct.number       = ARRAYNUM(rxbuffer);
+        dma_init_struct.periph_addr  = (uint32_t)USART1_RDATA_ADDRESS;
+        dma_init_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
+        dma_init_struct.priority     = DMA_PRIORITY_ULTRA_HIGH;
+        dma_single_data_mode_init(DMA0, DMA_CH1, &dma_init_struct);
+
+        /* configure DMA mode */
+        dma_circulation_disable(DMA0, DMA_CH1);
+        /* enable DMA channel 1 */
+        dma_channel_enable(DMA0, DMA_CH1);
+        /* USART DMA enable for reception */
+        usart_dma_receive_config(USART1, USART_RECEIVE_DMA_ENABLE);
+
+        /* wait DMA channel 1 transfer complete */
+        while((RESET == dma_flag_get(DMA0, DMA_CH1, DMA_FLAG_FTF)) & (readcount < 7));
+        readcount = 0;
+        /* invalidate d-cache by address */
+        SCB_InvalidateDCache_by_Addr((uint32_t*)rxbuffer, 32);
+        printf("\n\r%s\n\r", rxbuffer);
+    }
+}
 
 /**
  * @brief  重定向printf输出到串口
@@ -59,4 +143,61 @@ int fgetc(FILE *f)
     while (RESET == usart_flag_get(DEBUG_USARTX, USART_FLAG_RBNE))
         ;
     return (int)usart_data_receive(DEBUG_USARTX);
+}
+
+/*!
+    \brief      this function handles DMA_Channel0_IRQHandler exception
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void DMA0_Channel0_IRQHandler(void)
+{
+    if(RESET != dma_interrupt_flag_get(DMA0, DMA_CH0, DMA_INT_FLAG_FTF)) {
+        dma_interrupt_flag_clear(DMA0, DMA_CH0, DMA_INT_FLAG_FTF);
+        g_transfer_complete = SET;
+    }
+}
+
+/*!
+    \brief      this function handles DMA_Channel1_IRQHandler exception
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void DMA0_Channel1_IRQHandler(void)
+{
+    if(RESET != dma_interrupt_flag_get(DMA0, DMA_CH1, DMA_INT_FLAG_FTF)) {
+        dma_interrupt_flag_clear(DMA0, DMA_CH1, DMA_INT_FLAG_FTF);
+        g_transfer_complete = SET;
+    }
+}
+
+
+
+void USART1_IRQHandler(void)
+{
+    //如果接收超时中断没有启用
+    if(!(USART_CTL0(DEBUG_USARTX) & USART_CTL0_RTIE))
+    {
+        //启用接收超时中断
+         usart_interrupt_enable(DEBUG_USARTX, USART_INT_RT);
+        //关闭接收数据非空中断
+        usart_interrupt_disable(DEBUG_USARTX, USART_INT_RBNE);
+    }
+    
+    // 检查是否为接收超时中断
+    if(usart_interrupt_flag_get(DEBUG_USARTX, USART_INT_FLAG_RT) == SET) {
+        // 清除接收超时中断标志
+        usart_interrupt_flag_clear(DEBUG_USARTX, USART_INT_FLAG_RT);
+        
+        //获取dma0 channel 1 的cnt寄存器的值
+
+        readcount = dma_transfer_number_get(DMA0, DMA_CH1);
+        readcount = ARRAYNUM(rxbuffer) - readcount;
+        // 可选：暂时禁用接收超时，直到下一个数据包开始
+        usart_interrupt_disable(DEBUG_USARTX, USART_INT_RT);
+        // 启用接收数据非空中断
+        usart_interrupt_enable(DEBUG_USARTX, USART_INT_RBNE);
+    }
 }
