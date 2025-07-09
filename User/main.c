@@ -1,13 +1,16 @@
 #include "main.h"
 #include "gd32h7xx.h"
-#include "usart/debug_usart.h"
+#include "usart/console_usart.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include "log.h"
+#include "cli.h"
 
-task_info_t task_info_all[] = {{console_task, NAME_debug_task, STACK_debug_task,
-                                PARAM_debug_task, PRIORITY_debug_task, NULL}};
+task_info_t task_info_all[] = {{console_task, NAME_console_task, STACK_console_task,
+                                PARAM_console_task, PRIORITY_console_task, NULL},
+                                {CLI_Task, NAME_cli_task, STACK_cli_task,
+                                PARAM_cli_task, PRIORITY_cli_task, NULL}};
 
 #define TASK_NUM (sizeof(task_info_all) / sizeof(task_info_t))
 
@@ -27,7 +30,7 @@ int main(void)
 
     nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
 
-	console_init();
+		console_init();
 
     for (int i = 0; i < TASK_NUM; i++)
     {

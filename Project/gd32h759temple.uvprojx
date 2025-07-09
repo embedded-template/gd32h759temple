@@ -340,7 +340,7 @@
               <MiscControls>-Wno-invalid-source-encoding -fno-finite-math-only</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\Firmware\CMSIS\GD\GD32H7xx\Include;..\Firmware\GD32H7xx_standard_peripheral\Include;..\freeRtos\kernel\include;..\freeRtos\kernel\portable\GCC\ARM_CM7\r0p1;..\User;..\Lib\ring_buffer;..\Lib\logging;..\Driver</IncludePath>
+              <IncludePath>..\Firmware\CMSIS\GD\GD32H7xx\Include;..\Firmware\GD32H7xx_standard_peripheral\Include;..\freeRtos\kernel\include;..\freeRtos\kernel\portable\GCC\ARM_CM7\r0p1;..\User;..\Lib\ring_buffer;..\Lib\logging;..\Lib\cli;..\Driver</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -398,14 +398,26 @@
           <GroupName>Driver</GroupName>
           <Files>
             <File>
-              <FileName>debug_usart.c</FileName>
+              <FileName>console_usart.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Driver\usart\debug_usart.c</FilePath>
+              <FilePath>..\Driver\usart\console_usart.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>Lib</GroupName>
+          <Files>
+            <File>
+              <FileName>FreeRTOS_CLI.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\cli\FreeRTOS_CLI.c</FilePath>
+            </File>
+            <File>
+              <FileName>cli.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\cli\cli.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>Peripherals</GroupName>

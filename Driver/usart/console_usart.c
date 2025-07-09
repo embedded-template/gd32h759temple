@@ -1,4 +1,4 @@
-#include "debug_usart.h"
+#include "console_usart.h"
 #include "FreeRtos.h"
 #include "driver_test_config.h"
 #include "stdbool.h"

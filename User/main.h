@@ -3,6 +3,7 @@
 #include "task.h"
 #include <stdint.h>
 
+
 typedef struct task_info_t
 {
     TaskFunction_t pxTaskCode;
@@ -13,10 +14,15 @@ typedef struct task_info_t
     TaskHandle_t* const pxCreatedTask;
 } task_info_t;
 
-#define NAME_debug_task "test"
-#define STACK_debug_task 100
-#define PARAM_debug_task 100
-#define PRIORITY_debug_task 3
+#define NAME_console_task "test"
+#define STACK_console_task 100
+#define PARAM_console_task 100
+#define PRIORITY_console_task 3
+
+#define NAME_cli_task "cli"
+#define STACK_cli_task 100
+#define PARAM_cli_task 10
+#define PRIORITY_cli_task 3
 
 /* 栈溢出调试信息全局变量声明 */
 extern volatile TaskHandle_t g_overflow_task_handle;
