@@ -4,8 +4,8 @@
 
 #define LogTime "time"
 
-#define Log_info(X) LogInfo((X))
-#define Log_warn(X) LogWarn((X))
-#define Log_error(X) LogError((X))
-#define Log_debug(X) LogDebug((X))
-#define Log_always(X) LogAlways((X))
+#define Log_info(format, ...) LogInfo((format, ##__VA_ARGS__))
+#define Log_warn(format, ...) LogWarn((format, ##__VA_ARGS__))  
+#define Log_error(format, ...) LogError((format, ##__VA_ARGS__))
+#define Log_debug(format, ...) LogDebug((format, ##__VA_ARGS__))
+#define Log_always(format, ...) LogAlways((format, ##__VA_ARGS__))

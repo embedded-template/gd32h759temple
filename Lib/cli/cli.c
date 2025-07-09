@@ -157,7 +157,7 @@ void CLI_Task(void *pvParameters)
     pcOutputString = FreeRTOS_CLIGetOutputBuffer();
     
     CLI_Init();
-    Log_info(("CLI任务启动"));
+    Log_info("CLI任务启动");
     
     for(;;) {
        
