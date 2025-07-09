@@ -104,13 +104,13 @@ typedef struct ring_buff_t
         if (size == 0) { \
             break; \
         } \
-        rb = (ring_buff_t*)malloc(sizeof(ring_buff_t)); \
+        rb = (ring_buff_t*)pvPortMalloc(sizeof(ring_buff_t)); \
         if (rb == NULL) { \
             break; \
         } \
-        rb->p_buff = (uint8_t*)malloc(size); \
+        rb->p_buff = (uint8_t*)pvPortMalloc(size); \
         if (rb->p_buff == NULL) { \
-            free(rb); \
+            vPortFree(rb); \
             rb = NULL; \
             break; \
         } \
@@ -119,8 +119,8 @@ typedef struct ring_buff_t
         if (rb->read_mutex == NULL || rb->write_mutex == NULL) { \
             if (rb->read_mutex != NULL) vSemaphoreDelete(rb->read_mutex); \
             if (rb->write_mutex != NULL) vSemaphoreDelete(rb->write_mutex); \
-            free(rb->p_buff); \
-            free(rb); \
+            vPortFree(rb->p_buff); \
+            vPortFree(rb); \
             rb = NULL; \
             break; \
         } \
@@ -310,7 +310,7 @@ typedef struct ring_buff_t
         ring_buff_t *rb = &name##_ring_buff_instance; \
         if (rb) { \
             if (rb->p_buff) { \
-                free(rb->p_buff); \
+                vPortFree(rb->p_buff); \
                 rb->p_buff = NULL; \
             } \
             if (rb->read_mutex) { \
@@ -335,7 +335,7 @@ typedef struct ring_buff_t
             return rb; \
         } \
         \
-        rb->p_buff = (uint8_t*)malloc(buff_size); \
+        rb->p_buff = (uint8_t*)pvPortMalloc(buff_size); \
         if (rb->p_buff == NULL) { \
             return NULL; \
         } \
@@ -345,7 +345,7 @@ typedef struct ring_buff_t
         if (rb->read_mutex == NULL || rb->write_mutex == NULL) { \
             if (rb->read_mutex != NULL) vSemaphoreDelete(rb->read_mutex); \
             if (rb->write_mutex != NULL) vSemaphoreDelete(rb->write_mutex); \
-            free(rb->p_buff); \
+            vPortFree(rb->p_buff); \
             rb->p_buff = NULL; \
             return NULL; \
         } \

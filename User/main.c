@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 task_info_t task_info_all[] = {
-    {debug_task, NAME_debug_task, STACK_debug_task, PARAM_debug_task, PRIORITY_debug_task, NULL}
+    {console_task, NAME_debug_task, STACK_debug_task, PARAM_debug_task, PRIORITY_debug_task, NULL}
 };
 
 #define TASK_NUM (sizeof(task_info_all) / sizeof(task_info_t))

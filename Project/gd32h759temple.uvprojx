@@ -340,7 +340,7 @@
               <MiscControls>-Wno-invalid-source-encoding -fno-finite-math-only</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\Firmware\CMSIS\GD\GD32H7xx\Include;..\Firmware\GD32H7xx_standard_peripheral\Include;..\freeRtos\kernel\include;..\freeRtos\kernel\portable\GCC\ARM_CM7\r0p1;..\User;..\Driver</IncludePath>
+              <IncludePath>..\Firmware\CMSIS\GD\GD32H7xx\Include;..\Firmware\GD32H7xx_standard_peripheral\Include;..\freeRtos\kernel\include;..\freeRtos\kernel\portable\GCC\ARM_CM7\r0p1;..\User;..\Driver;..\Lib</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
