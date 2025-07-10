@@ -1,3 +1,6 @@
+mod cmd;
+
 fn main() {
-    println!("Hello, world!");
+    let cli = cmd::parse_args();
+    cli.run();
 }
