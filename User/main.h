@@ -3,7 +3,6 @@
 #include "task.h"
 #include <stdint.h>
 
-
 typedef struct task_info_t
 {
     TaskFunction_t pxTaskCode;

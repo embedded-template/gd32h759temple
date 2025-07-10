@@ -1,10 +1,10 @@
 #include "console_usart.h"
 #include "FreeRtos.h"
 #include "driver_test_config.h"
+#include "log.h"
 #include "stdbool.h"
 #include "task.h"
 #include <stdio.h>
-#include "log.h"
 
 #include "utilities/macro.h"
 
