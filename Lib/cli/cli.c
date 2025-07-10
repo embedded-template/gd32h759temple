@@ -72,8 +72,6 @@ void CLI_Init(void)
     FreeRTOS_CLIRegisterCommand(&xInfoCommand);
     FreeRTOS_CLIRegisterCommand(&xMemoryCommand);
     FreeRTOS_CLIRegisterCommand(&xTaskStatsCommand);
-    
-    Log_info(("CLI系统初始化完成"));
 }
 
 /**
@@ -157,7 +155,6 @@ void CLI_Task(void *pvParameters)
     pcOutputString = FreeRTOS_CLIGetOutputBuffer();
     
     CLI_Init();
-    Log_info("CLI任务启动");
     
     for(;;) {
        
