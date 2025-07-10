@@ -44,15 +44,6 @@ static const CLI_Command_Definition_t xMemoryCommand = {
 static const CLI_Command_Definition_t xTaskStatsCommand = {
     "tasks", "\r\ntasks:\r\n 显示任务状态信息\r\n", prvTaskStatsCommand, 0};
 
-/* 全局变量用于演示 set/get 命令 */
-static struct
-{
-    uint32_t led_blink_rate;
-    uint32_t sensor_poll_rate;
-    char device_name[32];
-} system_config = {
-    .led_blink_rate = 500, .sensor_poll_rate = 1000, .device_name = "GD32H759"};
-
 /**
  * @brief CLI初始化
  *
