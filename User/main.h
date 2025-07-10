@@ -19,7 +19,7 @@ typedef struct task_info_t
 #define PRIORITY_console_task 3
 
 #define NAME_cli_task "cli"
-#define STACK_cli_task 100
+#define STACK_cli_task 200
 #define PARAM_cli_task 10
 #define PRIORITY_cli_task 3
 

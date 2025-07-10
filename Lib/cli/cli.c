@@ -117,17 +117,44 @@ static BaseType_t prvTaskStatsCommand(char* pcWriteBuffer,
 {
     (void) pcCommandString;
 
-    UBaseType_t uxNumberOfTasks = uxTaskGetNumberOfTasks();
+    TaskStatus_t xTaskArray[6];  // 支持最多6个任务
+    UBaseType_t uxArraySize;
+    char* pcPtr = pcWriteBuffer;
+    size_t xRemaining = xWriteBufferLen;
+    int iLen;
 
-    snprintf(pcWriteBuffer, xWriteBufferLen,
-             "任务信息:\r\n"
-             "  当前任务数量: %u\r\n"
-             "  当前任务: %s\r\n"
-             "  调度器状态: %s\r\n"
-             "\r\n",
-             (unsigned int) uxNumberOfTasks, pcTaskGetName(NULL),
-             (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) ? "运行中"
-                                                                 : "停止");
+    // 获取任务信息
+    uxArraySize = uxTaskGetSystemState(xTaskArray, 6, NULL);
+
+    // 输出每个任务
+    for (UBaseType_t x = 0; x < uxArraySize && xRemaining > 50; x++) {
+        char cStatus;
+        switch (xTaskArray[x].eCurrentState) {
+            case eRunning: cStatus = 'R'; break;
+            case eReady: cStatus = 'r'; break;
+            case eBlocked: cStatus = 'B'; break;
+            case eSuspended: cStatus = 'S'; break;
+            case eDeleted: cStatus = 'D'; break;
+            default: cStatus = '?'; break;
+        }
+
+        iLen = snprintf(pcPtr, xRemaining,
+                       "Task:%u\r\n"
+                       "name:%s\r\n"
+                       "p:%u\r\n"
+                       "s:%u\r\n"
+                       "st:%c\r\n"
+                       "\r\n",
+                       (unsigned int)(x + 1),
+                       xTaskArray[x].pcTaskName,
+                       (unsigned int)xTaskArray[x].uxCurrentPriority,
+                       (unsigned int)xTaskArray[x].usStackHighWaterMark,
+                       cStatus);
+
+        if (iLen < 0 || (size_t)iLen >= xRemaining) break;
+        pcPtr += iLen;
+        xRemaining -= iLen;
+    }
 
     return pdFALSE;
 }
