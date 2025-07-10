@@ -44,15 +44,6 @@ static const CLI_Command_Definition_t xMemoryCommand = {
 static const CLI_Command_Definition_t xTaskStatsCommand = {
     "tasks", "\r\ntasks:\r\n 显示任务状态信息\r\n", prvTaskStatsCommand, 0};
 
-/* 全局变量用于演示 set/get 命令 */
-static struct
-{
-    uint32_t led_blink_rate;
-    uint32_t sensor_poll_rate;
-    char device_name[32];
-} system_config = {
-    .led_blink_rate = 500, .sensor_poll_rate = 1000, .device_name = "GD32H759"};
-
 /**
  * @brief CLI初始化
  *
@@ -75,12 +66,11 @@ static BaseType_t prvInfoCommand(char* pcWriteBuffer, size_t xWriteBufferLen,
 
     snprintf(pcWriteBuffer, xWriteBufferLen,
              "系统信息:\r\n"
-             "  设备名称: %s\r\n"
              "  FreeRTOS版本: %s\r\n"
              "  系统运行时间: %lu ms\r\n"
              "  CPU频率: 600 MHz\r\n"
              "\r\n",
-             system_config.device_name, tskKERNEL_VERSION_NUMBER,
+             tskKERNEL_VERSION_NUMBER,
              (unsigned long) (xTaskGetTickCount() * portTICK_PERIOD_MS));
 
     return pdFALSE;
