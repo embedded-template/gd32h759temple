@@ -66,12 +66,11 @@ static BaseType_t prvInfoCommand(char* pcWriteBuffer, size_t xWriteBufferLen,
 
     snprintf(pcWriteBuffer, xWriteBufferLen,
              "系统信息:\r\n"
-             "  设备名称: %s\r\n"
              "  FreeRTOS版本: %s\r\n"
              "  系统运行时间: %lu ms\r\n"
              "  CPU频率: 600 MHz\r\n"
              "\r\n",
-             system_config.device_name, tskKERNEL_VERSION_NUMBER,
+             tskKERNEL_VERSION_NUMBER,
              (unsigned long) (xTaskGetTickCount() * portTICK_PERIOD_MS));
 
     return pdFALSE;
