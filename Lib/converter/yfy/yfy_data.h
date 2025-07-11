@@ -14,10 +14,10 @@
 
 typedef struct module_data_t
 {
-    float voltage[MODULE_NUM];
-    float current[MODULE_NUM];
-    uint8_t group[MODULE_NUM];
-    int8_t temp[MODULE_NUM];
+    float voltage[MODULE_NUM];// 模块电压
+    float current[MODULE_NUM];// 模块电流
+    uint8_t group[MODULE_NUM];// 模块组号
+    int8_t temp[MODULE_NUM];// 模块温度
 
     // 模块状态表2
     uint8_t module_limit_power[MODULE_NUM];           // 限功率
@@ -62,16 +62,16 @@ typedef struct module_data_t
 
 typedef struct group_module_data_t
 {
-    float voltage[GROUP_MODULE_NUM];
-    float current[GROUP_MODULE_NUM];
-    uint8_t module_num[GROUP_MODULE_NUM];
+    float voltage[GROUP_MODULE_NUM];// 组电压
+    float current[GROUP_MODULE_NUM];// 组电流
+    uint8_t module_num[GROUP_MODULE_NUM];// 组内模块数量
 } group_module_data_t;
 
 typedef struct sys_module_data_t
 {
-    float voltage;
-    float current;
-    uint8_t module_num;
+    float voltage;// 系统电压
+    float current;// 系统电流
+    uint8_t module_num;// 系统模块数量
 } sys_module_data_t;
 
 typedef struct module_info_t
@@ -119,3 +119,7 @@ typedef enum module_info_type_t
 } module_info_type_t;
 
 bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata);
+
+module_data_t* get_module_data(void);
+group_module_data_t* get_group_module_data(void);
+sys_module_data_t* get_sys_module_data(void);

@@ -1,8 +1,10 @@
 #include "yfy_data.h"
-
+#include "string.h"
+#include "macro.h"
 
 static bool yfy_data_unpack(module_info_type_t type, uint8_t cmd, uint8_t module_addr, uint8_t* p_data);
-static bool yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_start, uint8_t bit_endd, uint8_t addr, uint8_t* pdata, void* pstore_data);
+static void yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_start, uint8_t bit_endd, uint8_t addr, uint8_t* pdata, void* pstore_data);
+
 /**
  * @defgroup 英飞源模块接收数据定义
  * @brief 不读条形码
@@ -10,9 +12,24 @@ static bool yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_sta
  */
 module_data_t stModuleData = {0};
 
+module_data_t* get_module_data(void)
+{
+    return &stModuleData;
+}
+
 group_module_data_t stGroupModuleData = {0};
 
+group_module_data_t* get_group_module_data(void)
+{
+    return &stGroupModuleData;
+}
+
 sys_module_data_t stSysModuleData = {0};
+
+sys_module_data_t* get_sys_module_data(void)
+{
+    return &stSysModuleData;
+}
 
 module_info_t stModuleInfo[] = {
     {.cmd = 0x03, .byte_start = 0, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.voltage[0]},
@@ -70,18 +87,11 @@ sys_module_inf_t stSysModuleInf[] = {{.cmd = 0x01, .byte_start = 0, .byte_end = 
                                      {.cmd = 0x01, .byte_start = 4, .byte_end = 8, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.current},
                                      {.cmd = 0x02, .byte_start = 2, .byte_end = 3, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.module_num}};
 
-/**
- * @}
- */
-
-/**
- * @defgroup 英飞源模块设置数据定义
- * @{
- */
 set_moduole_inf_t stSetModuleInf[] = {
     {.cmd = 0x13, .byte_start = 0, .byte_end = 1}, {.cmd = 0x14, .byte_start = 0, .byte_end = 1}, {.cmd = 0x16, .byte_start = 0, .byte_end = 1},
     {.cmd = 0x19, .byte_start = 0, .byte_end = 1}, {.cmd = 0x1A, .byte_start = 0, .byte_end = 1}, {.cmd = 0x1B, .byte_start = 0, .byte_end = 1},
     {.cmd = 0x1C, .byte_start = 0, .byte_end = 4}, {.cmd = 0x1C, .byte_start = 4, .byte_end = 8}, {.cmd = 0x1F, .byte_start = 0, .byte_end = 1}};
+
 /**
  * @}
  */
@@ -123,7 +133,7 @@ bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* p
 /**
  * @brief 将数据发送到
  */
-bool yfy_data_unpack(module_info_type_t type, uint8_t cmd, uint8_t module_addr, uint8_t* pdata)
+static bool yfy_data_unpack(module_info_type_t type, uint8_t cmd, uint8_t module_addr, uint8_t* pdata)
 {
     uint8_t start_parse = 1;
     uint8_t on_parse = 2;
@@ -205,21 +215,28 @@ bool yfy_data_unpack(module_info_type_t type, uint8_t cmd, uint8_t module_addr, 
 /**
  * @brief 存储数据
  */
-bool yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_start, uint8_t bit_endd, uint8_t addr, uint8_t* pdata, void* pstore_data)
+static void yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_start, uint8_t bit_endd, uint8_t addr, uint8_t* pdata, void* pstore_data)
 {
     if (byte_start == byte_end)
     {
         // 数据为一个bit,从pstore_data中取出数据，将特定的bit存入
         uint8_t data = pdata[byte_start];
-        uint8_t need_data = ((data >> bit_start) & 0x01) << bit_start;
-        uint8_t old_data = ((uint8_t*) pstore_data)[addr];
-        uint8_t new_data = old_data & need_data;
-        ((uint8_t*) pstore_data)[addr] = new_data;
+        uint8_t need_data = (data >> bit_start) & 0x01;
+        ((uint8_t*) pstore_data)[addr] = need_data;
     }
     else
     {
         uint8_t bytes = byte_end - byte_start;
-        uint8_t* p_data = (uint8_t*) pstore_data + addr;
-        memcpy(p_data, pdata + byte_start, bytes);
+        uint8_t* p_data = (uint8_t*) pstore_data + (addr * bytes);
+        // 当字节数大于1时，进行字节序转换（Big Endian -> Little Endian）
+        if (bytes > 1) {
+            // 创建临时缓冲区进行字节序转换（最大支持8字节）
+            uint8_t temp_data[8];
+            CONVERT_ENDIANNESS(pdata + byte_start, temp_data, bytes);
+            memcpy(p_data, temp_data, bytes);
+        } else {
+            // 单字节数据不需要转换
+            memcpy(p_data, pdata + byte_start, bytes);
+        }
     }
 }
