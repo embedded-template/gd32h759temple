@@ -33,19 +33,13 @@ void console_uart_init(void)
     rcu_periph_clock_enable(CONSOLE_USART_GPIO_CLK_RX);
     rcu_periph_clock_enable(CONSOLE_USART_CLK);
 
-    gpio_af_set(CONSOLE_USART_TX_GPIO_PORT, CONSOLE_USART_TX_RX_GPIO_AF,
-                CONSOLE_USART_TX_GPIO_PIN);
-    gpio_mode_set(CONSOLE_USART_TX_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP,
-                  CONSOLE_USART_TX_GPIO_PIN);
-    gpio_output_options_set(CONSOLE_USART_TX_GPIO_PORT, GPIO_OTYPE_PP,
-                            GPIO_OSPEED_100_220MHZ, CONSOLE_USART_TX_GPIO_PIN);
+    gpio_af_set(CONSOLE_USART_TX_GPIO_PORT, CONSOLE_USART_TX_RX_GPIO_AF, CONSOLE_USART_TX_GPIO_PIN);
+    gpio_mode_set(CONSOLE_USART_TX_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, CONSOLE_USART_TX_GPIO_PIN);
+    gpio_output_options_set(CONSOLE_USART_TX_GPIO_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, CONSOLE_USART_TX_GPIO_PIN);
 
-    gpio_af_set(CONSOLE_USART_RX_GPIO_PORT, CONSOLE_USART_TX_RX_GPIO_AF,
-                CONSOLE_USART_RX_GPIO_PIN);
-    gpio_mode_set(CONSOLE_USART_RX_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP,
-                  CONSOLE_USART_RX_GPIO_PIN);
-    gpio_output_options_set(CONSOLE_USART_RX_GPIO_PORT, GPIO_OTYPE_PP,
-                            GPIO_OSPEED_100_220MHZ, CONSOLE_USART_RX_GPIO_PIN);
+    gpio_af_set(CONSOLE_USART_RX_GPIO_PORT, CONSOLE_USART_TX_RX_GPIO_AF, CONSOLE_USART_RX_GPIO_PIN);
+    gpio_mode_set(CONSOLE_USART_RX_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, CONSOLE_USART_RX_GPIO_PIN);
+    gpio_output_options_set(CONSOLE_USART_RX_GPIO_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, CONSOLE_USART_RX_GPIO_PIN);
 
     usart_deinit(CONSOLE_USARTX);
 
@@ -165,8 +159,7 @@ void console_rx_task(void* pvParameters)
         if (console.rx_dma_buffer.size != 0)
         {
             // 接收到数据，读取，并重置DMA
-            int ret = console.rx_ring_buffer->write(
-                console.rx_dma_buffer.buffer, console.rx_dma_buffer.size, 100);
+            int ret = console.rx_ring_buffer->write(console.rx_dma_buffer.buffer, console.rx_dma_buffer.size, 100);
 
             if (ret > 0)
             {
@@ -181,8 +174,7 @@ void console_rx_task(void* pvParameters)
                 printf("console rx ring buffer write timeout\n\r");
             }
             console_rx_dma_config();
-            SCB_InvalidateDCache_by_Addr(
-                (uint32_t*) console.rx_dma_buffer.buffer, ret);
+            SCB_InvalidateDCache_by_Addr((uint32_t*) console.rx_dma_buffer.buffer, ret);
         }
         vTaskDelay(pdMS_TO_TICKS(10));
     }
@@ -199,15 +191,12 @@ void console_tx_task(void* pvParameters)
         {
             if (console.tx_dma_buffer.size == 0)
             {
-                int ret = console.tx_ring_buffer->read(
-                    console.tx_dma_buffer.buffer, CONSOLE_DMA_BUFFER_TX_SIZE,
-                    100);
+                int ret = console.tx_ring_buffer->read(console.tx_dma_buffer.buffer, CONSOLE_DMA_BUFFER_TX_SIZE, 100);
                 if (ret > 0)
                 {
                     console.tx_dma_buffer.size = ret;
                     // 确保 DMA 能看到最新数据
-                    SCB_CleanDCache_by_Addr(
-                        (uint32_t*) console.tx_dma_buffer.buffer, ret);
+                    SCB_CleanDCache_by_Addr((uint32_t*) console.tx_dma_buffer.buffer, ret);
                     console_tx_dma_config();
                 }
             }
@@ -225,8 +214,7 @@ void console_test(void* pvParameters)
     uint8_t data[CONSOLE_RING_BUFFER_RX_SIZE] = {0};
     while (1)
     {
-        int ret = console.rx_ring_buffer->read(
-            data, CONSOLE_RING_BUFFER_RX_SIZE, 100);
+        int ret = console.rx_ring_buffer->read(data, CONSOLE_RING_BUFFER_RX_SIZE, 100);
         if (ret == -1)
         {
             Log_info("console rx ring buffer read timeout");
@@ -312,16 +300,14 @@ void CONSOLE_USART_IRQ_HANDLER(void)
         // 清除接收超时中断标志
         usart_interrupt_flag_clear(CONSOLE_USARTX, USART_INT_FLAG_RT);
 
-        console.rx_dma_buffer.size =
-            CONSOLE_DMA_BUFFER_RX_SIZE - dma_transfer_number_get(DMA0, DMA_CH1);
+        console.rx_dma_buffer.size = CONSOLE_DMA_BUFFER_RX_SIZE - dma_transfer_number_get(DMA0, DMA_CH1);
 
         if (usart_interrupt_flag_get(CONSOLE_USARTX, USART_INT_FLAG_RT) == SET)
         {
             // 清除接收超时中断标志
             usart_interrupt_flag_clear(CONSOLE_USARTX, USART_INT_FLAG_RT);
 
-            console.rx_dma_buffer.size = CONSOLE_DMA_BUFFER_RX_SIZE -
-                                         dma_transfer_number_get(DMA0, DMA_CH1);
+            console.rx_dma_buffer.size = CONSOLE_DMA_BUFFER_RX_SIZE - dma_transfer_number_get(DMA0, DMA_CH1);
 
             // 禁用接收超时，直到下一个数据包开始
             usart_interrupt_disable(CONSOLE_USARTX, USART_INT_RT);

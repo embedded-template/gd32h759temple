@@ -1,91 +1,121 @@
 #pragma once
 #include "stdint.h"
+#include "stdbool.h"
 
 #define MODULE_NUM 12
-//存在一个空闲组，因此组号比模块数多1.空闲组号为0
+// 存在一个空闲组，因此组号比模块数多1.组号从1开始。空闲组为1。
 #define GROUP_MODULE_NUM (MODULE_NUM + 1)
+// 广播
+#define BROADCAST_ADDR 0x3f
+// 设备号
+#define DEVICE_ID 0x0A
+// 组设备号
+#define GROUP_DEVICE_ID 0x0B
 
-typedef struct module_data_t{
+typedef struct module_data_t
+{
     float voltage[MODULE_NUM];
     float current[MODULE_NUM];
     uint8_t group[MODULE_NUM];
     int8_t temp[MODULE_NUM];
 
     // 模块状态表2
-    uint8_t module_limit_power[MODULE_NUM];//限功率
-    uint8_t module_id_duplicate[MODULE_NUM];//模块ID重复
-    uint8_t module_severe_unbalanced[MODULE_NUM];//模块严重不均流
-    uint8_t three_phase_input_missing[MODULE_NUM];//三相输入缺相告警
-    uint8_t three_phase_input_unbalanced[MODULE_NUM];//三相输入不平衡告警
-    uint8_t input_undervoltage[MODULE_NUM];//输入欠压告警
-    uint8_t input_overvoltage[MODULE_NUM];//输入过压告警
-    uint8_t module_pfc_fault[MODULE_NUM];//模块PFC侧处于关机状态
-    
+    uint8_t module_limit_power[MODULE_NUM];           // 限功率
+    uint8_t module_id_duplicate[MODULE_NUM];          // 模块ID重复
+    uint8_t module_severe_unbalanced[MODULE_NUM];     // 模块严重不均流
+    uint8_t three_phase_input_missing[MODULE_NUM];    // 三相输入缺相告警
+    uint8_t three_phase_input_unbalanced[MODULE_NUM]; // 三相输入不平衡告警
+    uint8_t input_undervoltage[MODULE_NUM];           // 输入欠压告警
+    uint8_t input_overvoltage[MODULE_NUM];            // 输入过压告警
+    uint8_t module_pfc_fault[MODULE_NUM];             // 模块PFC侧处于关机状态
+
     // 模块状态表1
-    uint8_t module_dc_side_fault[MODULE_NUM];//模块 DC 侧处于关机状态
-    uint8_t module_fault[MODULE_NUM];//模块故障告警
-    uint8_t module_protection[MODULE_NUM];//模块保护告警
-    uint8_t fan_fault[MODULE_NUM];//风扇故障告警
-    uint8_t over_temp[MODULE_NUM];//过温告警
-    uint8_t output_overvoltage[MODULE_NUM];//输出过压告警
-    uint8_t walk_in_enable[MODULE_NUM];//WALK-IN 使能
-    uint8_t module_comm_interrupt[MODULE_NUM];//模块通信中断告警
+    uint8_t module_dc_side_fault[MODULE_NUM];  // 模块 DC 侧处于关机状态
+    uint8_t module_fault[MODULE_NUM];          // 模块故障告警
+    uint8_t module_protection[MODULE_NUM];     // 模块保护告警
+    uint8_t fan_fault[MODULE_NUM];             // 风扇故障告警
+    uint8_t over_temp[MODULE_NUM];             // 过温告警
+    uint8_t output_overvoltage[MODULE_NUM];    // 输出过压告警
+    uint8_t walk_in_enable[MODULE_NUM];        // WALK-IN 使能
+    uint8_t module_comm_interrupt[MODULE_NUM]; // 模块通信中断告警
 
     // 模块状态表0
-    uint8_t output_short_circuit[MODULE_NUM];//输出短路
-    uint8_t module_internal_comm_fault[MODULE_NUM];//模块内部通信故障
-    uint8_t input_or_bus_abnormal[MODULE_NUM];//输入或母线异常
-    uint8_t module_sleep[MODULE_NUM];//模块休眠
-    uint8_t module_discharge_abnormal[MODULE_NUM];//模块放电异常
+    uint8_t output_short_circuit[MODULE_NUM];       // 输出短路
+    uint8_t module_internal_comm_fault[MODULE_NUM]; // 模块内部通信故障
+    uint8_t input_or_bus_abnormal[MODULE_NUM];      // 输入或母线异常
+    uint8_t module_sleep[MODULE_NUM];               // 模块休眠
+    uint8_t module_discharge_abnormal[MODULE_NUM];  // 模块放电异常
 
-    uint16_t ac_input_voltage_ab[MODULE_NUM];// 交流输入电压AB相电压
-    uint16_t ac_input_voltage_bc[MODULE_NUM];// 交流输入电压BC相电压
-    uint16_t ac_input_voltage_ca[MODULE_NUM];// 交流输入电压CA相电压
+    uint16_t ac_input_voltage_ab[MODULE_NUM]; // 交流输入电压AB相电压
+    uint16_t ac_input_voltage_bc[MODULE_NUM]; // 交流输入电压BC相电压
+    uint16_t ac_input_voltage_ca[MODULE_NUM]; // 交流输入电压CA相电压
 
-    //最大电压，最小电压，最大电流，最大功率
-    uint16_t max_voltage[MODULE_NUM];
-    uint16_t min_voltage[MODULE_NUM];
-    uint16_t max_current[MODULE_NUM];
-    uint16_t max_power[MODULE_NUM];
+    uint16_t max_voltage[MODULE_NUM]; // 最大电压
+    uint16_t min_voltage[MODULE_NUM]; // 最小电压
+    uint16_t max_current[MODULE_NUM]; // 最大电流
+    uint16_t max_power[MODULE_NUM];   // 最大功率
 
-}module_data_t;
+    uint16_t external_voltage[MODULE_NUM];   // 外部电压
+    uint16_t max_output_current[MODULE_NUM]; // 当前最大输出电流
 
-typedef struct group_module_data_t{
+} module_data_t;
+
+typedef struct group_module_data_t
+{
     float voltage[GROUP_MODULE_NUM];
     float current[GROUP_MODULE_NUM];
     uint8_t module_num[GROUP_MODULE_NUM];
-}group_module_data_t;
+} group_module_data_t;
 
-typedef struct sys_module_data_t{
+typedef struct sys_module_data_t
+{
     float voltage;
     float current;
     uint8_t module_num;
-}sys_module_data_t;
+} sys_module_data_t;
 
-typedef struct module_info_t{
+typedef struct module_info_t
+{
     uint16_t cmd;
     uint16_t byte_start;
     uint16_t byte_end;
     uint16_t bit_start;
     uint16_t bit_end;
     void* pdata;
-}module_info_t;
+} module_info_t;
 
-typedef struct group_module_info_t{
+typedef struct group_module_info_t
+{
     uint16_t cmd;
     uint16_t byte_start;
     uint16_t byte_end;
     uint16_t bit_start;
     uint16_t bit_end;
     void* pdata;
-}group_module_info_t;
+} group_module_info_t;
 
-typedef struct sys_module_inf_t{
+typedef struct sys_module_inf_t
+{
     uint16_t cmd;
     uint16_t byte_start;
     uint16_t byte_end;
     uint16_t bit_start;
     uint16_t bit_end;
     void* pdata;
-}sys_module_inf_t;
+} sys_module_inf_t;
 
+typedef struct set_moduole_inf_t
+{
+    uint16_t cmd;
+    uint16_t byte_start;
+    uint16_t byte_end;
+} set_moduole_inf_t;
+
+typedef enum module_info_type_t
+{
+    eModuleInfo,
+    eGroupModuleInfo,
+    eSysModuleInfo,
+} module_info_type_t;
+
+bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata);

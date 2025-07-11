@@ -1,5 +1,13 @@
 #include "yfy_data.h"
 
+
+static bool yfy_data_unpack(module_info_type_t type, uint8_t cmd, uint8_t module_addr, uint8_t* p_data);
+static bool yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_start, uint8_t bit_endd, uint8_t addr, uint8_t* pdata, void* pstore_data);
+/**
+ * @defgroup 英飞源模块接收数据定义
+ * @brief 不读条形码
+ * @{
+ */
 module_data_t stModuleData = {0};
 
 group_module_data_t stGroupModuleData = {0};
@@ -47,17 +55,171 @@ module_info_t stModuleInfo[] = {
     {.cmd = 0x0A, .byte_start = 2, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.min_voltage[0]},
     {.cmd = 0x0A, .byte_start = 4, .byte_end = 6, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.max_current[0]},
     {.cmd = 0x0A, .byte_start = 6, .byte_end = 8, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.max_power[0]},
+
+    {.cmd = 0x0C, .byte_start = 0, .byte_end = 2, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.external_voltage[0]},
+    {.cmd = 0x0C, .byte_start = 2, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.max_output_current[0]}
+
 };
 
 group_module_info_t stGroupModuleInfo[] = {
     {.cmd = 0x01, .byte_start = 0, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stGroupModuleData.voltage[0]},
     {.cmd = 0x01, .byte_start = 4, .byte_end = 8, .bit_start = 0, .bit_end = 0, .pdata = &stGroupModuleData.current[0]},
-    {.cmd = 0x02, .byte_start = 2, .byte_end = 3, .bit_start = 0, .bit_end = 0, .pdata = &stGroupModuleData.module_num[0]}
-};
+    {.cmd = 0x02, .byte_start = 2, .byte_end = 3, .bit_start = 0, .bit_end = 0, .pdata = &stGroupModuleData.module_num[0]}};
 
-sys_module_inf_t stSysModuleInf[] = {
-    {.cmd = 0x01, .byte_start = 0, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.voltage},
-    {.cmd = 0x01, .byte_start = 4, .byte_end = 8, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.current},
-    {.cmd = 0x02, .byte_start = 2, .byte_end = 3, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.module_num}
-};
+sys_module_inf_t stSysModuleInf[] = {{.cmd = 0x01, .byte_start = 0, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.voltage},
+                                     {.cmd = 0x01, .byte_start = 4, .byte_end = 8, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.current},
+                                     {.cmd = 0x02, .byte_start = 2, .byte_end = 3, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.module_num}};
 
+/**
+ * @}
+ */
+
+/**
+ * @defgroup 英飞源模块设置数据定义
+ * @{
+ */
+set_moduole_inf_t stSetModuleInf[] = {
+    {.cmd = 0x13, .byte_start = 0, .byte_end = 1}, {.cmd = 0x14, .byte_start = 0, .byte_end = 1}, {.cmd = 0x16, .byte_start = 0, .byte_end = 1},
+    {.cmd = 0x19, .byte_start = 0, .byte_end = 1}, {.cmd = 0x1A, .byte_start = 0, .byte_end = 1}, {.cmd = 0x1B, .byte_start = 0, .byte_end = 1},
+    {.cmd = 0x1C, .byte_start = 0, .byte_end = 4}, {.cmd = 0x1C, .byte_start = 4, .byte_end = 8}, {.cmd = 0x1F, .byte_start = 0, .byte_end = 1}};
+/**
+ * @}
+ */
+
+/**
+ * @brief 解析收到的数据
+ *
+ */
+bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata)
+{
+    // 通过设备号与命令号判断数据属于单个模块数据、组数据、系统数据中的哪个
+    if (cmd == 0x01 | cmd == 0x02)
+    {
+        // 数据为系统或者组
+        if (module_addr == BROADCAST_ADDR)
+        {
+            // 数据为系统
+            yfy_data_unpack(eSysModuleInfo, cmd, module_addr, pdata);
+        }
+        else if (dev_id == GROUP_DEVICE_ID)
+        {
+            // 数据为组
+            if(module_addr > GROUP_MODULE_NUM)
+            {
+                return false;
+            }
+            //组编号从1开始
+            yfy_data_unpack(eGroupModuleInfo, cmd, (module_addr - 1), pdata);
+        }
+    }
+    else
+    {
+        // 数据为单个模块
+        yfy_data_unpack(eModuleInfo, cmd, module_addr, pdata);
+        return false;
+    }
+}
+
+/**
+ * @brief 将数据发送到
+ */
+bool yfy_data_unpack(module_info_type_t type, uint8_t cmd, uint8_t module_addr, uint8_t* pdata)
+{
+    uint8_t start_parse = 1;
+    uint8_t on_parse = 2;
+    uint8_t end_parse = 3;
+    uint8_t parse_state = start_parse;
+    uint8_t module_group = module_addr;
+    uint8_t sys_addr = 0u;
+    if (type == eModuleInfo)
+    {
+        for (uint8_t i = 0; i < sizeof(stModuleInfo) / sizeof(stModuleInfo[0]); i++)
+        {
+            if (stModuleInfo[i].cmd == cmd)
+            {
+                yfy_data_store(stModuleInfo[i].byte_start, stModuleInfo[i].byte_end, stModuleInfo[i].bit_start, stModuleInfo[i].bit_end, module_addr, pdata,
+                               stModuleInfo[i].pdata);
+                if (parse_state == start_parse)
+                {
+                    parse_state = on_parse;
+                }
+            }
+            else if (parse_state == on_parse)
+            {
+                parse_state = end_parse;
+                break;
+            }
+        }
+    }
+    else if (type == eGroupModuleInfo)
+    {
+        for (uint8_t i = 0; i < sizeof(stGroupModuleInfo) / sizeof(stGroupModuleInfo[0]); i++)
+        {
+            if (stGroupModuleInfo[i].cmd == cmd)
+            {
+                yfy_data_store(stGroupModuleInfo[i].byte_start, stGroupModuleInfo[i].byte_end, stGroupModuleInfo[i].bit_start, stGroupModuleInfo[i].bit_end,
+                               module_group, pdata, stGroupModuleInfo[i].pdata);
+                if (parse_state == start_parse)
+                {
+                    parse_state = on_parse;
+                }
+            }
+            else if (parse_state == on_parse)
+            {
+                parse_state = end_parse;
+                break;
+            }
+        }
+    }
+    else if (type == eSysModuleInfo)
+    {
+        for (uint8_t i = 0; i < sizeof(stSysModuleInf) / sizeof(stSysModuleInf[0]); i++)
+        {
+            if (stSysModuleInf[i].cmd == cmd)
+            {
+                yfy_data_store(stSysModuleInf[i].byte_start, stSysModuleInf[i].byte_end, stSysModuleInf[i].bit_start, stSysModuleInf[i].bit_end, sys_addr,
+                               pdata, stSysModuleInf[i].pdata);
+                if (parse_state == start_parse)
+                {
+                    parse_state = on_parse;
+                }
+            }
+            else if (parse_state == on_parse)
+            {
+                parse_state = end_parse;
+                break;
+            }
+        }
+    }
+
+    if (parse_state == end_parse)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/**
+ * @brief 存储数据
+ */
+bool yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_start, uint8_t bit_endd, uint8_t addr, uint8_t* pdata, void* pstore_data)
+{
+    if (byte_start == byte_end)
+    {
+        // 数据为一个bit,从pstore_data中取出数据，将特定的bit存入
+        uint8_t data = pdata[byte_start];
+        uint8_t need_data = ((data >> bit_start) & 0x01) << bit_start;
+        uint8_t old_data = ((uint8_t*) pstore_data)[addr];
+        uint8_t new_data = old_data & need_data;
+        ((uint8_t*) pstore_data)[addr] = new_data;
+    }
+    else
+    {
+        uint8_t bytes = byte_end - byte_start;
+        uint8_t* p_data = (uint8_t*) pstore_data + addr;
+        memcpy(p_data, pdata + byte_start, bytes);
+    }
+}
