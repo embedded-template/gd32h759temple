@@ -1,0 +1,164 @@
+# YFY模块测试构建文件
+# 使用 just 命令运行各种测试和构建任务
+
+# 设置shell（Windows兼容）
+set shell := ["powershell.exe", "-c"]
+
+# 设置变量
+CC := "gcc"
+CFLAGS := "-I../../../utilities -I.."
+SOURCES := "../yfy_data.c ../yfy_interface.c"
+BUILD_DIR := "build"
+
+# 默认任务：显示帮助信息
+default:
+    @echo "YFY模块测试构建系统"
+    @echo "===================="
+    @echo ""
+    @echo "可用命令："
+    @echo "  just build          - 编译所有测试"
+    @echo "  just test           - 运行主要测试套件"
+    @echo "  just test-quick     - 运行快速冒烟测试"
+    @echo "  just test-full      - 运行完整详细测试"
+    @echo "  just test-perf      - 运行性能测试"
+    @echo "  just test-macro     - 运行宏测试"
+    @echo "  just test-all       - 运行所有测试"
+    @echo "  just clean          - 清理构建文件"
+    @echo "  just help           - 显示此帮助信息"
+
+# 显示帮助信息
+help: default
+
+# 创建构建目录
+_create-build-dir:
+    @if (!(Test-Path "{{BUILD_DIR}}")) { New-Item -ItemType Directory -Path "{{BUILD_DIR}}" }
+
+# 编译主要测试套件
+build-main: _create-build-dir
+    {{CC}} {{CFLAGS}} {{SOURCES}} run_tests.c -o {{BUILD_DIR}}/run_tests.exe
+
+# 编译详细单元测试
+build-unit: _create-build-dir
+    {{CC}} {{CFLAGS}} {{SOURCES}} unit_test.c -o {{BUILD_DIR}}/unit_test.exe
+
+# 编译综合性能测试
+build-comprehensive: _create-build-dir
+    {{CC}} {{CFLAGS}} {{SOURCES}} comprehensive_test.c -o {{BUILD_DIR}}/comprehensive_test.exe
+
+# 编译宏测试
+build-macro: _create-build-dir
+    {{CC}} {{CFLAGS}} test_macro_only.c -o {{BUILD_DIR}}/test_macro.exe
+
+# 编译宏示例
+build-macro-example: _create-build-dir
+    {{CC}} {{CFLAGS}} macro_usage_example.c -o {{BUILD_DIR}}/macro_example.exe
+
+# 编译头文件完整性测试
+build-header: _create-build-dir
+    {{CC}} {{CFLAGS}} {{SOURCES}} test_header_completeness.c -o {{BUILD_DIR}}/test_header.exe
+
+# 编译所有测试
+build: build-main build-unit build-comprehensive build-macro build-macro-example build-header
+    @echo "✅ 所有测试程序编译完成"
+
+# 运行主要测试套件（推荐）
+test: build-main
+    @echo "🚀 运行主要测试套件..."
+    @./{{BUILD_DIR}}/run_tests.exe
+
+# 运行快速冒烟测试
+test-quick: build-main
+    @echo "⚡ 运行快速冒烟测试..."
+    @./{{BUILD_DIR}}/run_tests.exe quick
+
+# 运行详细单元测试
+test-full: build-unit
+    @echo "🔍 运行详细单元测试..."
+    @./{{BUILD_DIR}}/unit_test.exe
+
+# 运行性能测试
+test-perf: build-comprehensive
+    @echo "📊 运行性能测试..."
+    @./{{BUILD_DIR}}/comprehensive_test.exe
+
+# 运行宏测试
+test-macro: build-macro
+    @echo "🔧 运行32位宏测试..."
+    @./{{BUILD_DIR}}/test_macro.exe
+
+# 运行宏示例
+demo-macro: build-macro-example
+    @echo "📖 运行宏使用示例..."
+    @./{{BUILD_DIR}}/macro_example.exe
+
+# 运行头文件完整性测试
+test-header: build-header
+    @echo "📋 运行头文件完整性测试..."
+    @./{{BUILD_DIR}}/test_header.exe
+
+# 运行所有测试
+test-all: test test-full test-perf test-macro test-header
+    @echo ""
+    @echo "🎉 所有测试完成！"
+
+# 清理构建文件
+clean:
+    @echo "🧹 清理构建文件..."
+    @if (Test-Path "{{BUILD_DIR}}") { Remove-Item -Recurse -Force "{{BUILD_DIR}}" }
+    @Remove-Item -Force "*.exe", "*.o" -ErrorAction SilentlyContinue
+    @echo "✅ 清理完成"
+
+# 重新构建所有
+rebuild: clean build
+    @echo "🔄 重新构建完成"
+
+# 持续集成测试（快速验证）
+ci: test-quick
+    @echo "✅ CI测试通过"
+
+# 发布前测试（完整验证）
+release-test: test-all
+    @echo "🚀 发布前测试完成"
+
+# 开发者快速验证
+dev: test-quick
+    @echo "👨‍💻 开发者快速验证完成"
+
+# 性能基准测试
+benchmark: test-perf
+    @echo "📈 性能基准测试完成"
+
+# 调试模式编译（添加调试信息）
+build-debug: _create-build-dir
+    {{CC}} {{CFLAGS}} -g -DDEBUG {{SOURCES}} run_tests.c -o {{BUILD_DIR}}/run_tests_debug.exe
+    @echo "🐛 调试版本编译完成"
+
+# 运行调试版本测试
+test-debug: build-debug
+    @echo "🐛 运行调试版本测试..."
+    @./{{BUILD_DIR}}/run_tests_debug.exe
+
+# 优化版本编译
+build-release: _create-build-dir
+    {{CC}} {{CFLAGS}} -O2 -DNDEBUG {{SOURCES}} run_tests.c -o {{BUILD_DIR}}/run_tests_release.exe
+    @echo "🚀 优化版本编译完成"
+
+# 运行优化版本测试
+test-release: build-release
+    @echo "🚀 运行优化版本测试..."
+    @./{{BUILD_DIR}}/run_tests_release.exe
+
+# 显示构建信息
+info:
+    @echo "构建信息："
+    @echo "编译器: {{CC}}"
+    @echo "编译选项: {{CFLAGS}}"
+    @echo "源文件: {{SOURCES}}"
+    @echo "构建目录: {{BUILD_DIR}}"
+    @echo "当前目录: $(pwd)"
+
+# 检查工具是否可用
+check-tools:
+    @echo "🔧 检查工具可用性..."
+    @try { gcc --version; echo "✅ gcc 可用" } catch { echo "❌ gcc 未安装" }
+    @echo "✅ 工具检查完成"

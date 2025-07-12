@@ -301,7 +301,6 @@ void yfy_send_read_cmd(uint8_t dev_id, uint8_t cmd, uint8_t module_addr)
     yfy_module_handle_t* handle = yfy_module_handle_get();
 
     uint8_t send_data[8] = {0};
-    memcpy(send_data, &cmd_data, 8);
     // 检查发送函数是否已初始化
     if (handle != NULL && handle->send != NULL) {
         // 将32位数据转换为字节数组发送

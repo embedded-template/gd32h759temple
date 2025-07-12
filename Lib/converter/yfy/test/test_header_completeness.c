@@ -6,6 +6,9 @@
  * 
  * 本测试验证yfy_interface.h中声明的所有函数都有对应的实现
  */
+extern module_data_t* get_module_data(void);
+extern group_module_data_t* get_group_module_data(void);
+extern sys_module_data_t* get_sys_module_data(void);
 
 int main() {
     printf("=== YFY接口头文件完整性测试 ===\n\n");
