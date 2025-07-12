@@ -1,15 +1,15 @@
 #pragma once
-#include "yfy_data.h"
 #include "stdbool.h"
+#include "yfy_data.h"
 
 // 返回值定义
-typedef enum {
+typedef enum
+{
     YFY_OK = 0,
     YFY_ERROR_INVALID_ADDR,
     YFY_ERROR_INVALID_GROUP,
     YFY_ERROR_NULL_POINTER
 } yfy_result_t;
-
 
 // ========== 第一类：读取单个模块数据的函数 ==========
 // 基本数据读取
@@ -113,4 +113,3 @@ void yfy_send_write_single_output(uint8_t module_addr, uint32_t volt, uint32_t c
 void yfy_send_write_sys_addr_model(uint8_t model);
 void yfy_send_write_addr_model_by_group(uint8_t group_num, uint8_t model);
 void yfy_send_write_single_addr_model(uint8_t module_addr, uint8_t model);
-

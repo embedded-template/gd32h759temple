@@ -1,21 +1,31 @@
 #include "yfy_data.h"
-#include "string.h"
 #include "macro.h"
+#include "string.h"
+#include <stdint.h>
 
 static bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata);
 static bool yfy_data_unpack(module_info_type_t type, uint8_t cmd, uint8_t module_addr, uint8_t* p_data);
 static void yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_start, uint8_t bit_endd, uint8_t addr, uint8_t* pdata, void* pstore_data);
 
-yfy_module_handle_t yfy_module_handle = {0};
+module_online_info_t stModuleOnlineInfo[MODULE_NUM] = {0};
 
-void yfy_module_handle_init(yfy_module_handle_t* handle)
+module_online_info_t* get_module_online_info(void)
 {
-    yfy_module_handle = *handle;
+    return stModuleOnlineInfo;
+}
+
+yfy_module_handle_t module_handle = {0};
+
+void yfy_module_handle_init(bool (*send)(uint32_t id, uint8_t* pdata), bool (*recv)(uint8_t id, uint8_t* pdata), uint32_t (*time)(void))
+{
+    module_handle.recv = recv;
+    module_handle.send = send;
+    module_handle.time = time;
 }
 
 yfy_module_handle_t* yfy_module_handle_get(void)
 {
-    return &yfy_module_handle;
+    return &module_handle;
 }
 
 /**
@@ -110,21 +120,23 @@ set_moduole_inf_t stSetModuleInf[] = {
  * @}
  */
 
+/**
+ * @brief 接收数据主任务
+ */
+void yfy_process_data(void)
+{
+    yfy_module_handle_t* handle = yfy_module_handle_get();
+    if (handle->recv == NULL)
+    {
+        return;
+    }
+    uint8_t id = 0;
+    uint8_t pdata[8] = {0};
 
- /**
-  * @brief 接收数据主任务
-  */
- void yfy_data_task(void)
- {
-     yfy_module_handle_t* handle = yfy_module_handle_get();
-     if (handle->recv == NULL)
-     {
-         return;
-     }
-     uint8_t id = 0;
-     uint8_t pdata[8] = {0};
-     for(int max_handle_count = 10; max_handle_count > 0; max_handle_count--)
-     {
+    module_online_check();
+
+    for (int max_handle_count = 10; max_handle_count > 0; max_handle_count--)
+    {
         if (handle->recv(id, pdata))
         {
             uint8_t dev_id = YFY_EXTRACT_DEVICE_ID(id);
@@ -136,9 +148,8 @@ set_moduole_inf_t stSetModuleInf[] = {
         {
             break;
         }
-     }
- }
-
+    }
+}
 
 /**
  * @brief 解析收到的数据
@@ -158,21 +169,28 @@ bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* p
         else if (dev_id == GROUP_DEVICE_ID)
         {
             // 数据为组
-            if(module_addr > GROUP_MODULE_NUM)
+            if (module_addr > GROUP_MODULE_NUM)
             {
                 return false;
             }
-            //组编号从1开始
+            // 组编号从1开始
             return yfy_data_unpack(eGroupModuleInfo, cmd, (module_addr - 1), pdata);
         }
     }
     else
     {
         // 数据为单个模块
-        if(module_addr >= MODULE_NUM)
+        if (module_addr >= MODULE_NUM)
         {
             return false;
         }
+        // 记录模块通讯时间
+        yfy_module_handle_t* handle = yfy_module_handle_get();
+        module_online_info_t* online_info = get_module_online_info();
+        online_info[module_addr].module_addr = module_addr;
+        online_info[module_addr].last_online_time = handle->time();
+        online_info[module_addr].is_online = true;
+        
         return yfy_data_unpack(eModuleInfo, cmd, module_addr, pdata);
     }
 }
@@ -276,12 +294,15 @@ static void yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_sta
         uint8_t bytes = byte_end - byte_start;
         uint8_t* p_data = (uint8_t*) pstore_data + (addr * bytes);
         // 当字节数大于1时，进行字节序转换（Big Endian -> Little Endian）
-        if (bytes > 1) {
+        if (bytes > 1)
+        {
             // 创建临时缓冲区进行字节序转换（最大支持8字节）
             uint8_t temp_data[8];
             CONVERT_ENDIANNESS(pdata + byte_start, temp_data, bytes);
             memcpy(p_data, temp_data, bytes);
-        } else {
+        }
+        else
+        {
             // 单字节数据不需要转换
             memcpy(p_data, pdata + byte_start, bytes);
         }
@@ -302,7 +323,8 @@ void yfy_send_read_cmd(uint8_t dev_id, uint8_t cmd, uint8_t module_addr)
 
     uint8_t send_data[8] = {0};
     // 检查发送函数是否已初始化
-    if (handle != NULL && handle->send != NULL) {
+    if (handle != NULL && handle->send != NULL)
+    {
         // 将32位数据转换为字节数组发送
 
         // 调用发送函数
@@ -312,7 +334,7 @@ void yfy_send_read_cmd(uint8_t dev_id, uint8_t cmd, uint8_t module_addr)
 
 /**
  * @brief 发送设置命令
- * 
+ *
  */
 void yfy_send_write_cmd(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata)
 {
@@ -324,10 +346,63 @@ void yfy_send_write_cmd(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_
     yfy_module_handle_t* handle = yfy_module_handle_get();
 
     // 检查发送函数是否已初始化
-    if (handle != NULL && handle->send != NULL) {
+    if (handle != NULL && handle->send != NULL)
+    {
         // 将32位数据转换为字节数组发送
 
         // 调用发送函数
         handle->send(cmd_data, pdata);
+    }
+}
+
+/**
+ * @brief 检查模块在线状态
+ */
+void module_online_check(void)
+{
+    static uint32_t last_check_time = 0;
+    uint32_t current_time = module_handle.time();
+    uint32_t check_interval_diff;
+
+    // 计算距离上次检查的时间差（处理溢出）
+    if (current_time >= last_check_time) {
+        check_interval_diff = current_time - last_check_time;
+    } else {
+        // 处理32位时间溢出
+        check_interval_diff = (UINT32_MAX - last_check_time) + current_time + 1;
+    }
+
+    // 每1000ms执行一次主要检查逻辑
+    if (check_interval_diff >= 1000) {
+        last_check_time = current_time;
+
+        module_online_info_t* online_info = get_module_online_info();
+        for (uint8_t i = 0; i < MODULE_NUM; i++)
+        {
+            if (online_info[i].is_online)
+            {
+                uint32_t last_time = online_info[i].last_online_time;
+                uint32_t time_diff;
+
+                // 处理32位时间溢出情况
+                if (current_time >= last_time)
+                {
+                    // 正常情况：当前时间大于等于上次在线时间
+                    time_diff = current_time - last_time;
+                }
+                else
+                {
+                    // 溢出情况：当前时间小于上次在线时间（时间戳已溢出）
+                    // 计算跨越溢出点的时间差
+                    time_diff = (UINT32_MAX - last_time) + current_time + 1;
+                }
+
+                // 检查是否超过离线超时时间
+                if (time_diff >= MODULE_OFFLINE_TIME)
+                {
+                    online_info[i].is_online = false;
+                }
+            }
+        }
     }
 }

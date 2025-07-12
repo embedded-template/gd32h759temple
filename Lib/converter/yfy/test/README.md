@@ -78,6 +78,7 @@ just info           # 显示构建信息
 - `just test-full` - 详细单元测试
 - `just test-perf` - 性能测试
 - `just test-macro` - 32位宏测试
+- `just test-interval` - 1000ms间隔检查测试
 - `just test-all` - 运行所有测试
 - `just demo-macro` - 宏使用示例
 - `just clean` - 清理构建文件
@@ -86,7 +87,22 @@ just info           # 显示构建信息
 - `just dev` - 开发者快速验证
 - `just info` - 显示构建信息
 
-### 5. 其他测试文件
+### 5. `test_interval_check.c` - 1000ms间隔检查测试
+**性能优化测试**：验证模块在线状态检查的1000ms间隔控制功能。
+
+```bash
+# 运行间隔检查测试
+just test-interval
+```
+
+**测试内容**：
+- ✅ **间隔控制**：验证每1000ms执行一次检查
+- ✅ **跳过机制**：验证小于1000ms间隔时跳过检查
+- ✅ **超时检测**：验证在间隔控制下仍能正确检测超时
+- ✅ **32位溢出**：验证时间戳溢出时的间隔计算
+- ✅ **性能优化**：减少CPU负载，提高系统效率
+
+### 6. 其他测试文件
 - `test_macro_only.c` - 专门测试32位宏
 - `macro_usage_example.c` - 宏使用示例
 - `test_header_completeness.c` - 头文件完整性测试

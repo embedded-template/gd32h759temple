@@ -1,9 +1,8 @@
 #include "yfy_data.h"
 #include "yfy_interface.h"
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
-
 
 // 外部声明全局数据结构
 extern module_data_t stModuleData;
@@ -11,18 +10,21 @@ extern group_module_data_t stGroupModuleData;
 extern sys_module_data_t stSysModuleData;
 
 // 测试辅助函数
-void print_test_result(const char* test_name, bool result) {
+void print_test_result(const char* test_name, bool result)
+{
     printf("[%s] %s: %s\n", result ? "PASS" : "FAIL", test_name, result ? "SUCCESS" : "FAILED");
 }
 
-void clear_test_data() {
+void clear_test_data()
+{
     memset(&stModuleData, 0, sizeof(stModuleData));
     memset(&stGroupModuleData, 0, sizeof(stGroupModuleData));
     memset(&stSysModuleData, 0, sizeof(stSysModuleData));
 }
 
 // 测试1: 单个模块电压数据解析 (cmd=0x03)
-void test_module_voltage_parse() {
+void test_module_voltage_parse()
+{
     printf("\n=== 测试1: 单个模块电压数据解析 ===\n");
     clear_test_data();
 
@@ -44,7 +46,8 @@ void test_module_voltage_parse() {
 }
 
 // 测试2: 单个模块电流数据解析 (cmd=0x03)
-void test_module_current_parse() {
+void test_module_current_parse()
+{
     printf("\n=== 测试2: 单个模块电流数据解析 ===\n");
     clear_test_data();
 
@@ -65,19 +68,20 @@ void test_module_current_parse() {
 }
 
 // 测试3: 模块状态数据解析 (cmd=0x04)
-void test_module_status_parse() {
+void test_module_status_parse()
+{
     printf("\n=== 测试3: 模块状态数据解析 ===\n");
     clear_test_data();
 
     // 模拟状态数据
     uint8_t status_data[8] = {
-        0x00, 0x00,     // 前2字节
-        0x02,           // byte2: 组号 = 2
-        0x00,           // byte3
-        0x1E,           // byte4: 温度 = 30°C
-        0x85,           // byte5: 状态位 10000101 (bit0=1限功率, bit2=1严重不均流, bit7=1 PFC故障)
-        0x42,           // byte6: 状态位 01000010 (bit1=1模块故障, bit6=1 WALK-IN使能)
-        0x11            // byte7: 状态位 00010001 (bit0=1输出短路, bit4=1模块放电异常)
+        0x00, 0x00, // 前2字节
+        0x02,       // byte2: 组号 = 2
+        0x00,       // byte3
+        0x1E,       // byte4: 温度 = 30°C
+        0x85,       // byte5: 状态位 10000101 (bit0=1限功率, bit2=1严重不均流, bit7=1 PFC故障)
+        0x42,       // byte6: 状态位 01000010 (bit1=1模块故障, bit6=1 WALK-IN使能)
+        0x11        // byte7: 状态位 00010001 (bit0=1输出短路, bit4=1模块放电异常)
     };
 
     bool result = yfy_data_parse(DEVICE_ID, 0x04, 2, status_data);
@@ -91,17 +95,15 @@ void test_module_status_parse() {
     printf("模块2模块故障: %d (期望: 1)\n", stModuleData.module_fault[2]);
     printf("模块2输出短路: %d (期望: 1)\n", stModuleData.output_short_circuit[2]);
 
-    bool test_passed = (stModuleData.group[2] == 2) &&
-                      (stModuleData.temp[2] == 30) &&
-                      (stModuleData.module_limit_power[2] == 1) &&
-                      (stModuleData.module_severe_unbalanced[2] == 1) &&
-                      (stModuleData.module_pfc_fault[2] == 1);
+    bool test_passed = (stModuleData.group[2] == 2) && (stModuleData.temp[2] == 30) && (stModuleData.module_limit_power[2] == 1) &&
+                       (stModuleData.module_severe_unbalanced[2] == 1) && (stModuleData.module_pfc_fault[2] == 1);
 
     print_test_result("模块状态解析", test_passed);
 }
 
 // 测试4: 组数据解析 (cmd=0x01)
-void test_group_data_parse() {
+void test_group_data_parse()
+{
     printf("\n=== 测试4: 组数据解析 ===\n");
     clear_test_data();
 
@@ -121,7 +123,8 @@ void test_group_data_parse() {
 }
 
 // 测试5: 系统数据解析 (cmd=0x01, 广播地址)
-void test_system_data_parse() {
+void test_system_data_parse()
+{
     printf("\n=== 测试5: 系统数据解析 ===\n");
     clear_test_data();
 
@@ -141,7 +144,8 @@ void test_system_data_parse() {
 }
 
 // 测试6: 错误情况测试
-void test_error_cases() {
+void test_error_cases()
+{
     printf("\n=== 测试6: 错误情况测试 ===\n");
 
     // 测试无效组号
@@ -156,7 +160,8 @@ void test_error_cases() {
 }
 
 // 测试7: 接口函数测试 - 单个模块数据读取
-void test_interface_module_functions() {
+void test_interface_module_functions()
+{
     printf("\n=== 测试7: 接口函数 - 单个模块数据读取 ===\n");
     clear_test_data();
 
@@ -192,11 +197,9 @@ void test_interface_module_functions() {
     printf("模块0交流输入电压AB: %d V (期望: 380)\n", ac_voltage);
     printf("模块0最大电压: %d V (期望: 50)\n", max_voltage);
 
-    bool test_passed = (result1 == YFY_OK) && (result2 == YFY_OK) && (result3 == YFY_OK) &&
-                      (result4 == YFY_OK) && (result5 == YFY_OK) && (result6 == YFY_OK) &&
-                      (result7 == YFY_OK) && (voltage == 48.5f) && (current == 12.3f) &&
-                      (group == 2) && (temp == 25) && (status == 1) &&
-                      (ac_voltage == 380) && (max_voltage == 50);
+    bool test_passed = (result1 == YFY_OK) && (result2 == YFY_OK) && (result3 == YFY_OK) && (result4 == YFY_OK) && (result5 == YFY_OK) && (result6 == YFY_OK) &&
+                       (result7 == YFY_OK) && (voltage == 48.5f) && (current == 12.3f) && (group == 2) && (temp == 25) && (status == 1) &&
+                       (ac_voltage == 380) && (max_voltage == 50);
 
     print_test_result("模块数据读取接口", test_passed);
 
@@ -210,16 +213,17 @@ void test_interface_module_functions() {
 }
 
 // 测试8: 接口函数测试 - 组数据读取
-void test_interface_group_functions() {
+void test_interface_group_functions()
+{
     printf("\n=== 测试8: 接口函数 - 组数据读取 ===\n");
     clear_test_data();
 
     // 设置测试数据
-    stGroupModuleData.voltage[0] = 48.0f;  // 组1
+    stGroupModuleData.voltage[0] = 48.0f; // 组1
     stGroupModuleData.current[0] = 100.0f;
     stGroupModuleData.module_num[0] = 4;
 
-    stGroupModuleData.voltage[2] = 47.5f;  // 组3
+    stGroupModuleData.voltage[2] = 47.5f; // 组3
     stGroupModuleData.current[2] = 95.0f;
     stGroupModuleData.module_num[2] = 3;
 
@@ -244,20 +248,19 @@ void test_interface_group_functions() {
     printf("组3电流: %.2f A (期望: 95.00)\n", current);
     printf("组3模块数: %d (期望: 3)\n", module_num);
 
-    bool test_passed = (result1 == YFY_OK) && (result2 == YFY_OK) && (result3 == YFY_OK) &&
-                      (result4 == YFY_OK) && (result5 == YFY_OK) && (result6 == YFY_OK);
+    bool test_passed = (result1 == YFY_OK) && (result2 == YFY_OK) && (result3 == YFY_OK) && (result4 == YFY_OK) && (result5 == YFY_OK) && (result6 == YFY_OK);
 
     print_test_result("组数据读取接口", test_passed);
 
     // 测试无效组号
-    yfy_result_t result_invalid1 = yfy_get_group_voltage(0, &voltage);  // 组号从1开始
+    yfy_result_t result_invalid1 = yfy_get_group_voltage(0, &voltage); // 组号从1开始
     yfy_result_t result_invalid2 = yfy_get_group_voltage(GROUP_MODULE_NUM + 1, &voltage);
-    print_test_result("无效组号检查", (result_invalid1 == YFY_ERROR_INVALID_GROUP) &&
-                                    (result_invalid2 == YFY_ERROR_INVALID_GROUP));
+    print_test_result("无效组号检查", (result_invalid1 == YFY_ERROR_INVALID_GROUP) && (result_invalid2 == YFY_ERROR_INVALID_GROUP));
 }
 
 // 测试9: 接口函数测试 - 系统数据读取
-void test_interface_system_functions() {
+void test_interface_system_functions()
+{
     printf("\n=== 测试9: 接口函数 - 系统数据读取 ===\n");
     clear_test_data();
 
@@ -277,8 +280,7 @@ void test_interface_system_functions() {
     printf("系统电流: %.2f A (期望: 1000.00)\n", current);
     printf("系统模块数: %d (期望: 12)\n", module_num);
 
-    bool test_passed = (result1 == YFY_OK) && (result2 == YFY_OK) && (result3 == YFY_OK) &&
-                      (voltage == 480.0f) && (current == 1000.0f) && (module_num == 12);
+    bool test_passed = (result1 == YFY_OK) && (result2 == YFY_OK) && (result3 == YFY_OK) && (voltage == 480.0f) && (current == 1000.0f) && (module_num == 12);
 
     print_test_result("系统数据读取接口", test_passed);
 
@@ -288,15 +290,16 @@ void test_interface_system_functions() {
 }
 
 // 测试10: 32位数据组装宏测试
-void test_32bit_data_assembly() {
+void test_32bit_data_assembly()
+{
     printf("\n=== 测试10: 32位数据组装宏测试 ===\n");
 
     // 测试数据组装
-    uint8_t error_code = 0x02;    // 3 bits: 010
-    uint8_t device_id = 0x0A;     // 4 bits: 1010 (DEVICE_ID)
-    uint8_t cmd = 0x03;           // 6 bits: 000011
-    uint8_t dest_addr = 0x05;     // 8 bits: 00000101
-    uint8_t src_addr = 0xF0;      // 8 bits: 11110000 (MONITOR_ADDR)
+    uint8_t error_code = 0x02; // 3 bits: 010
+    uint8_t device_id = 0x0A;  // 4 bits: 1010 (DEVICE_ID)
+    uint8_t cmd = 0x03;        // 6 bits: 000011
+    uint8_t dest_addr = 0x05;  // 8 bits: 00000101
+    uint8_t src_addr = 0xF0;   // 8 bits: 11110000 (MONITOR_ADDR)
 
     // 组装32位数据
     uint32_t assembled_data = YFY_SET_ID(error_code, device_id, cmd, dest_addr, src_addr);
@@ -325,11 +328,8 @@ void test_32bit_data_assembly() {
     printf("提取目的地址: 0x%02X (期望: 0x%02X)\n", extracted_dest, dest_addr);
     printf("提取源地址: 0x%02X (期望: 0x%02X)\n", extracted_src, src_addr);
 
-    bool extract_test = (extracted_error == error_code) &&
-                       (extracted_device == device_id) &&
-                       (extracted_cmd == cmd) &&
-                       (extracted_dest == dest_addr) &&
-                       (extracted_src == src_addr);
+    bool extract_test = (extracted_error == error_code) && (extracted_device == device_id) && (extracted_cmd == cmd) && (extracted_dest == dest_addr) &&
+                        (extracted_src == src_addr);
 
     print_test_result("32位数据提取", extract_test);
 
@@ -338,7 +338,7 @@ void test_32bit_data_assembly() {
 
     // 测试最大值
     uint32_t max_data = YFY_SET_ID(0x07, 0x0F, 0x3F, 0xFF, 0xFF);
-    uint32_t expected_max = 0x1FFFFFFF;  // 所有位都是1（除了高3位）
+    uint32_t expected_max = 0x1FFFFFFF; // 所有位都是1（除了高3位）
     printf("最大值测试: 0x%08X (期望: 0x%08X)\n", max_data, expected_max);
     print_test_result("边界值最大", max_data == expected_max);
 
@@ -362,10 +362,11 @@ void test_32bit_data_assembly() {
     uint32_t broadcast_cmd = YFY_SET_ID(0, DEVICE_ID, 0x01, BROADCAST_ADDR, MONITOR_ADDR);
     printf("广播命令: 0x%08X\n", broadcast_cmd);
 
-    print_test_result("实际应用场景", true);  // 只要能正常执行就算通过
+    print_test_result("实际应用场景", true); // 只要能正常执行就算通过
 }
 
-int main() {
+int main()
+{
     printf("=== YFY数据解析和接口函数测试程序 ===\n");
     printf("模块数量: %d\n", MODULE_NUM);
     printf("组数量: %d\n", GROUP_MODULE_NUM);

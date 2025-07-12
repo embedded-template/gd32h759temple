@@ -22,6 +22,7 @@ default:
     @echo "  just test-full      - 运行完整详细测试"
     @echo "  just test-perf      - 运行性能测试"
     @echo "  just test-macro     - 运行宏测试"
+    @echo "  just test-interval  - 运行间隔检查测试"
     @echo "  just test-all       - 运行所有测试"
     @echo "  just clean          - 清理构建文件"
     @echo "  just help           - 显示此帮助信息"
@@ -57,8 +58,12 @@ build-macro-example: _create-build-dir
 build-header: _create-build-dir
     {{CC}} {{CFLAGS}} {{SOURCES}} test_header_completeness.c -o {{BUILD_DIR}}/test_header.exe
 
+# 编译间隔检查测试
+build-interval: _create-build-dir
+    {{CC}} {{CFLAGS}} {{SOURCES}} test_interval_check.c -o {{BUILD_DIR}}/test_interval.exe
+
 # 编译所有测试
-build: build-main build-unit build-comprehensive build-macro build-macro-example build-header
+build: build-main build-unit build-comprehensive build-macro build-macro-example build-header build-interval
     @echo "✅ 所有测试程序编译完成"
 
 # 运行主要测试套件（推荐）
@@ -96,8 +101,13 @@ test-header: build-header
     @echo "📋 运行头文件完整性测试..."
     @./{{BUILD_DIR}}/test_header.exe
 
+# 运行间隔检查测试
+test-interval: build-interval
+    @echo "⏱️ 运行1000ms间隔检查测试..."
+    @./{{BUILD_DIR}}/test_interval.exe
+
 # 运行所有测试
-test-all: test test-full test-perf test-macro test-header
+test-all: test test-full test-perf test-macro test-header test-interval
     @echo ""
     @echo "🎉 所有测试完成！"
 
