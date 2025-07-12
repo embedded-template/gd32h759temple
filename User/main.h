@@ -23,6 +23,11 @@ typedef struct task_info_t
 #define PARAM_cli_task 10
 #define PRIORITY_cli_task 3
 
+#define NAME_power_control_task "power_control"
+#define STACK_power_control_task 200
+#define PARAM_power_control_task 10
+#define PRIORITY_power_control_task 3
+
 /* 栈溢出调试信息全局变量声明 */
 extern volatile TaskHandle_t g_overflow_task_handle;
 extern volatile char g_overflow_task_name[configMAX_TASK_NAME_LEN];

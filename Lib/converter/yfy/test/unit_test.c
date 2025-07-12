@@ -84,14 +84,14 @@ void test_basic_data_read()
     int8_t temp;
 
     // 测试模块0
-    TEST_ASSERT(yfy_get_module_voltage(0, &voltage) == YFY_OK && voltage == 48.0f, "模块0电压读取");
-    TEST_ASSERT(yfy_get_module_current(0, &current) == YFY_OK && current == 10.0f, "模块0电流读取");
-    TEST_ASSERT(yfy_get_module_group(0, &group) == YFY_OK && group == 1, "模块0组号读取");
-    TEST_ASSERT(yfy_get_module_temp(0, &temp) == YFY_OK && temp == 25, "模块0温度读取");
+    TEST_ASSERT(yfy_get_module_voltage(0, &voltage) == true && voltage == 48.0f, "模块0电压读取");
+    TEST_ASSERT(yfy_get_module_current(0, &current) == true && current == 10.0f, "模块0电流读取");
+    TEST_ASSERT(yfy_get_module_group(0, &group) == true && group == 1, "模块0组号读取");
+    TEST_ASSERT(yfy_get_module_temp(0, &temp) == true && temp == 25, "模块0温度读取");
 
     // 测试边界检查
-    TEST_ASSERT(yfy_get_module_voltage(MODULE_NUM, &voltage) == YFY_ERROR_INVALID_ADDR, "无效地址检查");
-    TEST_ASSERT(yfy_get_module_voltage(0, NULL) == YFY_ERROR_NULL_POINTER, "空指针检查");
+    TEST_ASSERT(yfy_get_module_voltage(MODULE_NUM, &voltage) == false, "无效地址检查");
+    TEST_ASSERT(yfy_get_module_voltage(0, NULL) == false, "空指针检查");
 }
 
 // 测试2：状态位读取
@@ -102,16 +102,16 @@ void test_status_read()
     uint8_t status;
 
     // 测试状态表2
-    TEST_ASSERT(yfy_get_module_limit_power(0, &status) == YFY_OK && status == 0, "限功率状态读取");
-    TEST_ASSERT(yfy_get_module_limit_power(1, &status) == YFY_OK && status == 1, "限功率状态读取(模块1)");
+    TEST_ASSERT(yfy_get_module_limit_power(0, &status) == true && status == 0, "限功率状态读取");
+    TEST_ASSERT(yfy_get_module_limit_power(1, &status) == true && status == 1, "限功率状态读取(模块1)");
 
     // 测试状态表1
-    TEST_ASSERT(yfy_get_module_dc_side_fault(0, &status) == YFY_OK, "DC侧故障状态读取");
-    TEST_ASSERT(yfy_get_fan_fault(0, &status) == YFY_OK, "风扇故障状态读取");
+    TEST_ASSERT(yfy_get_module_dc_side_fault(0, &status) == true, "DC侧故障状态读取");
+    TEST_ASSERT(yfy_get_fan_fault(0, &status) == true, "风扇故障状态读取");
 
     // 测试状态表0
-    TEST_ASSERT(yfy_get_output_short_circuit(0, &status) == YFY_OK, "输出短路状态读取");
-    TEST_ASSERT(yfy_get_module_sleep(0, &status) == YFY_OK, "模块休眠状态读取");
+    TEST_ASSERT(yfy_get_output_short_circuit(0, &status) == true, "输出短路状态读取");
+    TEST_ASSERT(yfy_get_module_sleep(0, &status) == true, "模块休眠状态读取");
 }
 
 // 测试3：电压电流读取
@@ -122,20 +122,20 @@ void test_voltage_current_read()
     uint16_t voltage, current;
 
     // 测试交流输入电压
-    TEST_ASSERT(yfy_get_ac_input_voltage_ab(0, &voltage) == YFY_OK && voltage == 380, "AB相电压读取");
-    TEST_ASSERT(yfy_get_ac_input_voltage_ab(1, &voltage) == YFY_OK && voltage == 390, "AB相电压读取(模块1)");
+    TEST_ASSERT(yfy_get_ac_input_voltage_ab(0, &voltage) == true && voltage == 380, "AB相电压读取");
+    TEST_ASSERT(yfy_get_ac_input_voltage_ab(1, &voltage) == true && voltage == 390, "AB相电压读取(模块1)");
 
     // 测试最大最小值
-    TEST_ASSERT(yfy_get_max_voltage(0, &voltage) == YFY_OK && voltage == 50, "最大电压读取");
-    TEST_ASSERT(yfy_get_max_voltage(1, &voltage) == YFY_OK && voltage == 51, "最大电压读取(模块1)");
+    TEST_ASSERT(yfy_get_max_voltage(0, &voltage) == true && voltage == 50, "最大电压读取");
+    TEST_ASSERT(yfy_get_max_voltage(1, &voltage) == true && voltage == 51, "最大电压读取(模块1)");
 
     // 测试其他参数
-    TEST_ASSERT(yfy_get_external_voltage(0, &voltage) == YFY_OK, "外部电压读取");
-    TEST_ASSERT(yfy_get_max_output_current(0, &current) == YFY_OK, "最大输出电流读取");
+    TEST_ASSERT(yfy_get_external_voltage(0, &voltage) == true, "外部电压读取");
+    TEST_ASSERT(yfy_get_max_output_current(0, &current) == true, "最大输出电流读取");
 
     uint8_t addr_mode;
-    TEST_ASSERT(yfy_get_module_addr_mode(0, &addr_mode) == YFY_OK && addr_mode == 0, "地址模式读取");
-    TEST_ASSERT(yfy_get_module_addr_mode(1, &addr_mode) == YFY_OK && addr_mode == 1, "地址模式读取(模块1)");
+    TEST_ASSERT(yfy_get_module_addr_mode(0, &addr_mode) == true && addr_mode == 0, "地址模式读取");
+    TEST_ASSERT(yfy_get_module_addr_mode(1, &addr_mode) == true && addr_mode == 1, "地址模式读取(模块1)");
 }
 
 // 测试4：组数据读取
@@ -147,18 +147,18 @@ void test_group_data_read()
     uint8_t module_num;
 
     // 测试组1数据
-    TEST_ASSERT(yfy_get_group_voltage(1, &voltage) == YFY_OK && voltage == 48.0f, "组1电压读取");
-    TEST_ASSERT(yfy_get_group_current(1, &current) == YFY_OK && current == 100.0f, "组1电流读取");
-    TEST_ASSERT(yfy_get_group_module_num(1, &module_num) == YFY_OK && module_num == 4, "组1模块数读取");
+    TEST_ASSERT(yfy_get_group_voltage(1, &voltage) == true && voltage == 48.0f, "组1电压读取");
+    TEST_ASSERT(yfy_get_group_current(1, &current) == true && current == 100.0f, "组1电流读取");
+    TEST_ASSERT(yfy_get_group_module_num(1, &module_num) == true && module_num == 4, "组1模块数读取");
 
     // 测试组2数据
-    TEST_ASSERT(yfy_get_group_voltage(2, &voltage) == YFY_OK && voltage == 48.1f, "组2电压读取");
-    TEST_ASSERT(yfy_get_group_current(2, &current) == YFY_OK && current == 110.0f, "组2电流读取");
+    TEST_ASSERT(yfy_get_group_voltage(2, &voltage) == true && voltage == 48.1f, "组2电压读取");
+    TEST_ASSERT(yfy_get_group_current(2, &current) == true && current == 110.0f, "组2电流读取");
 
     // 测试边界检查
-    TEST_ASSERT(yfy_get_group_voltage(0, &voltage) == YFY_ERROR_INVALID_GROUP, "无效组号检查(0)");
-    TEST_ASSERT(yfy_get_group_voltage(GROUP_MODULE_NUM + 1, &voltage) == YFY_ERROR_INVALID_GROUP, "无效组号检查(超限)");
-    TEST_ASSERT(yfy_get_group_voltage(1, NULL) == YFY_ERROR_NULL_POINTER, "组数据空指针检查");
+    TEST_ASSERT(yfy_get_group_voltage(0, &voltage) == false, "无效组号检查(0)");
+    TEST_ASSERT(yfy_get_group_voltage(GROUP_MODULE_NUM + 1, &voltage) == false, "无效组号检查(超限)");
+    TEST_ASSERT(yfy_get_group_voltage(1, NULL) == false, "组数据空指针检查");
 }
 
 // 测试5：系统数据读取
@@ -169,12 +169,12 @@ void test_system_data_read()
     float voltage, current;
     uint8_t module_num;
 
-    TEST_ASSERT(yfy_get_sys_voltage(&voltage) == YFY_OK && voltage == 480.0f, "系统电压读取");
-    TEST_ASSERT(yfy_get_sys_current(&current) == YFY_OK && current == 1000.0f, "系统电流读取");
-    TEST_ASSERT(yfy_get_sys_module_num(&module_num) == YFY_OK && module_num == 12, "系统模块数读取");
+    TEST_ASSERT(yfy_get_sys_voltage(&voltage) == true && voltage == 480.0f, "系统电压读取");
+    TEST_ASSERT(yfy_get_sys_current(&current) == true && current == 1000.0f, "系统电流读取");
+    TEST_ASSERT(yfy_get_sys_module_num(&module_num) == true && module_num == 12, "系统模块数读取");
 
     // 测试空指针检查
-    TEST_ASSERT(yfy_get_sys_voltage(NULL) == YFY_ERROR_NULL_POINTER, "系统数据空指针检查");
+    TEST_ASSERT(yfy_get_sys_voltage(NULL) == false, "系统数据空指针检查");
 }
 
 // 测试6：32位数据组装宏

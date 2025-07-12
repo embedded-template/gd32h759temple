@@ -23,10 +23,10 @@ int main()
     sys_module_data_t* (*get_sys_ptr)(void) = get_sys_module_data;
 
     // 测试读取函数指针
-    yfy_result_t (*get_voltage_ptr)(uint8_t, float*) = yfy_get_module_voltage;
-    yfy_result_t (*get_current_ptr)(uint8_t, float*) = yfy_get_module_current;
-    yfy_result_t (*get_group_voltage_ptr)(uint8_t, float*) = yfy_get_group_voltage;
-    yfy_result_t (*get_sys_voltage_ptr)(float*) = yfy_get_sys_voltage;
+    bool (*get_voltage_ptr)(uint8_t, float*) = yfy_get_module_voltage;
+    bool (*get_current_ptr)(uint8_t, float*) = yfy_get_module_current;
+    bool (*get_group_voltage_ptr)(uint8_t, float*) = yfy_get_group_voltage;
+    bool (*get_sys_voltage_ptr)(float*) = yfy_get_sys_voltage;
 
     // 测试发送命令函数指针
     void (*send_read_sys_ptr)(void) = yfy_send_read_sys_output;

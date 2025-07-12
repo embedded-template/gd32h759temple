@@ -130,6 +130,7 @@ void yfy_process_data(void)
     {
         return;
     }
+
     uint8_t id = 0;
     uint8_t pdata[8] = {0};
 
@@ -176,6 +177,7 @@ bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* p
             // 组编号从1开始
             return yfy_data_unpack(eGroupModuleInfo, cmd, (module_addr - 1), pdata);
         }
+        return false;
     }
     else
     {
@@ -190,7 +192,7 @@ bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* p
         online_info[module_addr].module_addr = module_addr;
         online_info[module_addr].last_online_time = handle->time();
         online_info[module_addr].is_online = true;
-        
+
         return yfy_data_unpack(eModuleInfo, cmd, module_addr, pdata);
     }
 }
@@ -365,15 +367,19 @@ void module_online_check(void)
     uint32_t check_interval_diff;
 
     // 计算距离上次检查的时间差（处理溢出）
-    if (current_time >= last_check_time) {
+    if (current_time >= last_check_time)
+    {
         check_interval_diff = current_time - last_check_time;
-    } else {
+    }
+    else
+    {
         // 处理32位时间溢出
         check_interval_diff = (UINT32_MAX - last_check_time) + current_time + 1;
     }
 
     // 每1000ms执行一次主要检查逻辑
-    if (check_interval_diff >= 1000) {
+    if (check_interval_diff >= 1000)
+    {
         last_check_time = current_time;
 
         module_online_info_t* online_info = get_module_online_info();

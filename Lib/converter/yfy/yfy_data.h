@@ -196,3 +196,5 @@ yfy_module_handle_t* yfy_module_handle_get(void);
 void yfy_process_data(void);
 
 void module_online_check(void);
+
+module_online_info_t* get_module_online_info(void);

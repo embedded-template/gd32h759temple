@@ -157,21 +157,21 @@ void boundary_test()
     uint8_t status;
 
     // 测试模块地址边界
-    ASSERT_TEST(yfy_get_module_voltage(0, &voltage) == YFY_OK, "最小模块地址(0)");
-    ASSERT_TEST(yfy_get_module_voltage(MODULE_NUM - 1, &voltage) == YFY_OK, "最大模块地址");
-    ASSERT_TEST(yfy_get_module_voltage(MODULE_NUM, &voltage) == YFY_ERROR_INVALID_ADDR, "超出模块地址");
-    ASSERT_TEST(yfy_get_module_voltage(255, &voltage) == YFY_ERROR_INVALID_ADDR, "最大uint8地址");
+    ASSERT_TEST(yfy_get_module_voltage(0, &voltage) == true, "最小模块地址(0)");
+    ASSERT_TEST(yfy_get_module_voltage(MODULE_NUM - 1, &voltage) == true, "最大模块地址");
+    ASSERT_TEST(yfy_get_module_voltage(MODULE_NUM, &voltage) == false, "超出模块地址");
+    ASSERT_TEST(yfy_get_module_voltage(255, &voltage) == false, "最大uint8地址");
 
     // 测试组号边界
-    ASSERT_TEST(yfy_get_group_voltage(1, &voltage) == YFY_OK, "最小组号(1)");
-    ASSERT_TEST(yfy_get_group_voltage(GROUP_MODULE_NUM, &voltage) == YFY_OK, "最大组号");
-    ASSERT_TEST(yfy_get_group_voltage(0, &voltage) == YFY_ERROR_INVALID_GROUP, "无效组号(0)");
-    ASSERT_TEST(yfy_get_group_voltage(GROUP_MODULE_NUM + 1, &voltage) == YFY_ERROR_INVALID_GROUP, "超出组号");
+    ASSERT_TEST(yfy_get_group_voltage(1, &voltage) == true, "最小组号(1)");
+    ASSERT_TEST(yfy_get_group_voltage(GROUP_MODULE_NUM, &voltage) == true, "最大组号");
+    ASSERT_TEST(yfy_get_group_voltage(0, &voltage) == false, "无效组号(0)");
+    ASSERT_TEST(yfy_get_group_voltage(GROUP_MODULE_NUM + 1, &voltage) == false, "超出组号");
 
     // 测试空指针
-    ASSERT_TEST(yfy_get_module_voltage(0, NULL) == YFY_ERROR_NULL_POINTER, "模块数据空指针");
-    ASSERT_TEST(yfy_get_group_voltage(1, NULL) == YFY_ERROR_NULL_POINTER, "组数据空指针");
-    ASSERT_TEST(yfy_get_sys_voltage(NULL) == YFY_ERROR_NULL_POINTER, "系统数据空指针");
+    ASSERT_TEST(yfy_get_module_voltage(0, NULL) == false, "模块数据空指针");
+    ASSERT_TEST(yfy_get_group_voltage(1, NULL) == false, "组数据空指针");
+    ASSERT_TEST(yfy_get_sys_voltage(NULL) == false, "系统数据空指针");
 }
 
 // 数据一致性测试
@@ -253,40 +253,40 @@ void full_coverage_test()
     int8_t i8_val;
 
     // 测试所有第一类函数（采样测试）
-    ASSERT_TEST(yfy_get_module_voltage(0, &f_val) == YFY_OK, "模块电压");
-    ASSERT_TEST(yfy_get_module_current(0, &f_val) == YFY_OK, "模块电流");
-    ASSERT_TEST(yfy_get_module_group(0, &u8_val) == YFY_OK, "模块组号");
-    ASSERT_TEST(yfy_get_module_temp(0, &i8_val) == YFY_OK, "模块温度");
+    ASSERT_TEST(yfy_get_module_voltage(0, &f_val) == true, "模块电压");
+    ASSERT_TEST(yfy_get_module_current(0, &f_val) == true, "模块电流");
+    ASSERT_TEST(yfy_get_module_group(0, &u8_val) == true, "模块组号");
+    ASSERT_TEST(yfy_get_module_temp(0, &i8_val) == true, "模块温度");
 
     // 状态表2采样
-    ASSERT_TEST(yfy_get_module_limit_power(0, &u8_val) == YFY_OK, "限功率状态");
-    ASSERT_TEST(yfy_get_module_id_duplicate(0, &u8_val) == YFY_OK, "ID重复状态");
-    ASSERT_TEST(yfy_get_three_phase_input_missing(0, &u8_val) == YFY_OK, "三相缺相状态");
+    ASSERT_TEST(yfy_get_module_limit_power(0, &u8_val) == true, "限功率状态");
+    ASSERT_TEST(yfy_get_module_id_duplicate(0, &u8_val) == true, "ID重复状态");
+    ASSERT_TEST(yfy_get_three_phase_input_missing(0, &u8_val) == true, "三相缺相状态");
 
     // 状态表1采样
-    ASSERT_TEST(yfy_get_module_dc_side_fault(0, &u8_val) == YFY_OK, "DC侧故障");
-    ASSERT_TEST(yfy_get_fan_fault(0, &u8_val) == YFY_OK, "风扇故障");
-    ASSERT_TEST(yfy_get_over_temp(0, &u8_val) == YFY_OK, "过温状态");
+    ASSERT_TEST(yfy_get_module_dc_side_fault(0, &u8_val) == true, "DC侧故障");
+    ASSERT_TEST(yfy_get_fan_fault(0, &u8_val) == true, "风扇故障");
+    ASSERT_TEST(yfy_get_over_temp(0, &u8_val) == true, "过温状态");
 
     // 状态表0采样
-    ASSERT_TEST(yfy_get_output_short_circuit(0, &u8_val) == YFY_OK, "输出短路");
-    ASSERT_TEST(yfy_get_module_sleep(0, &u8_val) == YFY_OK, "模块休眠");
+    ASSERT_TEST(yfy_get_output_short_circuit(0, &u8_val) == true, "输出短路");
+    ASSERT_TEST(yfy_get_module_sleep(0, &u8_val) == true, "模块休眠");
 
     // 电压电流采样
-    ASSERT_TEST(yfy_get_ac_input_voltage_ab(0, &u16_val) == YFY_OK, "AB相电压");
-    ASSERT_TEST(yfy_get_max_voltage(0, &u16_val) == YFY_OK, "最大电压");
-    ASSERT_TEST(yfy_get_external_voltage(0, &u16_val) == YFY_OK, "外部电压");
-    ASSERT_TEST(yfy_get_module_addr_mode(0, &u8_val) == YFY_OK, "地址模式");
+    ASSERT_TEST(yfy_get_ac_input_voltage_ab(0, &u16_val) == true, "AB相电压");
+    ASSERT_TEST(yfy_get_max_voltage(0, &u16_val) == true, "最大电压");
+    ASSERT_TEST(yfy_get_external_voltage(0, &u16_val) == true, "外部电压");
+    ASSERT_TEST(yfy_get_module_addr_mode(0, &u8_val) == true, "地址模式");
 
     // 第二类函数
-    ASSERT_TEST(yfy_get_group_voltage(1, &f_val) == YFY_OK, "组电压");
-    ASSERT_TEST(yfy_get_group_current(1, &f_val) == YFY_OK, "组电流");
-    ASSERT_TEST(yfy_get_group_module_num(1, &u8_val) == YFY_OK, "组模块数");
+    ASSERT_TEST(yfy_get_group_voltage(1, &f_val) == true, "组电压");
+    ASSERT_TEST(yfy_get_group_current(1, &f_val) == true, "组电流");
+    ASSERT_TEST(yfy_get_group_module_num(1, &u8_val) == true, "组模块数");
 
     // 第三类函数
-    ASSERT_TEST(yfy_get_sys_voltage(&f_val) == YFY_OK, "系统电压");
-    ASSERT_TEST(yfy_get_sys_current(&f_val) == YFY_OK, "系统电流");
-    ASSERT_TEST(yfy_get_sys_module_num(&u8_val) == YFY_OK, "系统模块数");
+    ASSERT_TEST(yfy_get_sys_voltage(&f_val) == true, "系统电压");
+    ASSERT_TEST(yfy_get_sys_current(&f_val) == true, "系统电流");
+    ASSERT_TEST(yfy_get_sys_module_num(&u8_val) == true, "系统模块数");
 }
 
 int main()

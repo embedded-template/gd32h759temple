@@ -64,8 +64,8 @@ bool test_basic_functions()
     float voltage;
     uint8_t group;
 
-    return (yfy_get_module_voltage(0, &voltage) == YFY_OK && voltage == 48.0f) && (yfy_get_module_group(0, &group) == YFY_OK && group == 1) &&
-           (yfy_get_module_voltage(MODULE_NUM, &voltage) == YFY_ERROR_INVALID_ADDR) && (yfy_get_module_voltage(0, NULL) == YFY_ERROR_NULL_POINTER);
+    return (yfy_get_module_voltage(0, &voltage) == true && voltage == 48.0f) && (yfy_get_module_group(0, &group) == true && group == 1) &&
+           (yfy_get_module_voltage(MODULE_NUM, &voltage) == false) && (yfy_get_module_voltage(0, NULL) == false);
 }
 
 // 测试2：状态读取
@@ -73,8 +73,8 @@ bool test_status_functions()
 {
     uint8_t status;
 
-    return (yfy_get_module_limit_power(0, &status) == YFY_OK) && (yfy_get_module_dc_side_fault(0, &status) == YFY_OK) &&
-           (yfy_get_output_short_circuit(0, &status) == YFY_OK) && (yfy_get_module_limit_power(MODULE_NUM, &status) == YFY_ERROR_INVALID_ADDR);
+    return (yfy_get_module_limit_power(0, &status) == true) && (yfy_get_module_dc_side_fault(0, &status) == true) &&
+           (yfy_get_output_short_circuit(0, &status) == true) && (yfy_get_module_limit_power(MODULE_NUM, &status) == false);
 }
 
 // 测试3：电压电流
@@ -83,9 +83,8 @@ bool test_voltage_current()
     uint16_t voltage;
     uint8_t addr_mode;
 
-    return (yfy_get_ac_input_voltage_ab(0, &voltage) == YFY_OK && voltage == 380) && (yfy_get_max_voltage(0, &voltage) == YFY_OK && voltage == 50) &&
-           (yfy_get_module_addr_mode(0, &addr_mode) == YFY_OK && addr_mode == 0) &&
-           (yfy_get_ac_input_voltage_ab(MODULE_NUM, &voltage) == YFY_ERROR_INVALID_ADDR);
+    return (yfy_get_ac_input_voltage_ab(0, &voltage) == true && voltage == 380) && (yfy_get_max_voltage(0, &voltage) == true && voltage == 50) &&
+           (yfy_get_module_addr_mode(0, &addr_mode) == true && addr_mode == 0) && (yfy_get_ac_input_voltage_ab(MODULE_NUM, &voltage) == false);
 }
 
 // 测试4：组数据
@@ -94,9 +93,9 @@ bool test_group_functions()
     float voltage, current;
     uint8_t module_num;
 
-    return (yfy_get_group_voltage(1, &voltage) == YFY_OK && voltage == 48.0f) && (yfy_get_group_current(1, &current) == YFY_OK && current == 100.0f) &&
-           (yfy_get_group_module_num(1, &module_num) == YFY_OK && module_num == 4) && (yfy_get_group_voltage(0, &voltage) == YFY_ERROR_INVALID_GROUP) &&
-           (yfy_get_group_voltage(GROUP_MODULE_NUM + 1, &voltage) == YFY_ERROR_INVALID_GROUP);
+    return (yfy_get_group_voltage(1, &voltage) == true && voltage == 48.0f) && (yfy_get_group_current(1, &current) == true && current == 100.0f) &&
+           (yfy_get_group_module_num(1, &module_num) == true && module_num == 4) && (yfy_get_group_voltage(0, &voltage) == false) &&
+           (yfy_get_group_voltage(GROUP_MODULE_NUM + 1, &voltage) == false);
 }
 
 // 测试5：系统数据
@@ -105,8 +104,8 @@ bool test_system_functions()
     float voltage, current;
     uint8_t module_num;
 
-    return (yfy_get_sys_voltage(&voltage) == YFY_OK && voltage == 480.0f) && (yfy_get_sys_current(&current) == YFY_OK && current == 1000.0f) &&
-           (yfy_get_sys_module_num(&module_num) == YFY_OK && module_num == 12) && (yfy_get_sys_voltage(NULL) == YFY_ERROR_NULL_POINTER);
+    return (yfy_get_sys_voltage(&voltage) == true && voltage == 480.0f) && (yfy_get_sys_current(&current) == true && current == 1000.0f) &&
+           (yfy_get_sys_module_num(&module_num) == true && module_num == 12) && (yfy_get_sys_voltage(NULL) == false);
 }
 
 // 测试6：32位宏
@@ -127,20 +126,20 @@ bool test_boundary_conditions()
     // 测试所有模块地址
     for (int i = 0; i < MODULE_NUM; i++)
     {
-        if (yfy_get_module_voltage(i, &voltage) != YFY_OK) return false;
+        if (yfy_get_module_voltage(i, &voltage) != true) return false;
     }
 
     // 测试所有组号
     for (int i = 1; i <= GROUP_MODULE_NUM; i++)
     {
-        if (yfy_get_group_voltage(i, &voltage) != YFY_OK) return false;
+        if (yfy_get_group_voltage(i, &voltage) != true) return false;
     }
 
     // 测试所有状态函数（采样）
-    return (yfy_get_module_limit_power(0, &status) == YFY_OK) && (yfy_get_module_id_duplicate(0, &status) == YFY_OK) &&
-           (yfy_get_module_severe_unbalanced(0, &status) == YFY_OK) && (yfy_get_three_phase_input_missing(0, &status) == YFY_OK) &&
-           (yfy_get_three_phase_input_unbalanced(0, &status) == YFY_OK) && (yfy_get_input_undervoltage(0, &status) == YFY_OK) &&
-           (yfy_get_input_overvoltage(0, &status) == YFY_OK) && (yfy_get_module_pfc_fault(0, &status) == YFY_OK);
+    return (yfy_get_module_limit_power(0, &status) == true) && (yfy_get_module_id_duplicate(0, &status) == true) &&
+           (yfy_get_module_severe_unbalanced(0, &status) == true) && (yfy_get_three_phase_input_missing(0, &status) == true) &&
+           (yfy_get_three_phase_input_unbalanced(0, &status) == true) && (yfy_get_input_undervoltage(0, &status) == true) &&
+           (yfy_get_input_overvoltage(0, &status) == true) && (yfy_get_module_pfc_fault(0, &status) == true);
 }
 
 // 测试8：数据类型覆盖
@@ -151,14 +150,14 @@ bool test_data_types()
     uint16_t u16_val;
     int8_t i8_val;
 
-    return (yfy_get_module_voltage(0, &f_val) == YFY_OK) &&        // float
-           (yfy_get_module_current(0, &f_val) == YFY_OK) &&        // float
-           (yfy_get_module_group(0, &u8_val) == YFY_OK) &&         // uint8_t
-           (yfy_get_module_temp(0, &i8_val) == YFY_OK) &&          // int8_t
-           (yfy_get_ac_input_voltage_ab(0, &u16_val) == YFY_OK) && // uint16_t
-           (yfy_get_max_voltage(0, &u16_val) == YFY_OK) &&         // uint16_t
-           (yfy_get_group_voltage(1, &f_val) == YFY_OK) &&         // float
-           (yfy_get_sys_voltage(&f_val) == YFY_OK);                // float
+    return (yfy_get_module_voltage(0, &f_val) == true) &&        // float
+           (yfy_get_module_current(0, &f_val) == true) &&        // float
+           (yfy_get_module_group(0, &u8_val) == true) &&         // uint8_t
+           (yfy_get_module_temp(0, &i8_val) == true) &&          // int8_t
+           (yfy_get_ac_input_voltage_ab(0, &u16_val) == true) && // uint16_t
+           (yfy_get_max_voltage(0, &u16_val) == true) &&         // uint16_t
+           (yfy_get_group_voltage(1, &f_val) == true) &&         // float
+           (yfy_get_sys_voltage(&f_val) == true);                // float
 }
 
 // 快速冒烟测试
@@ -168,8 +167,8 @@ bool quick_smoke_test()
     uint8_t status;
 
     // 只测试最关键的几个函数
-    return (yfy_get_module_voltage(0, &voltage) == YFY_OK) && (yfy_get_group_voltage(1, &voltage) == YFY_OK) && (yfy_get_sys_voltage(&voltage) == YFY_OK) &&
-           (yfy_get_module_limit_power(0, &status) == YFY_OK) && (YFY_SET_ID(0, 1, 2, 3, 4) != 0);
+    return (yfy_get_module_voltage(0, &voltage) == true) && (yfy_get_group_voltage(1, &voltage) == true) && (yfy_get_sys_voltage(&voltage) == true) &&
+           (yfy_get_module_limit_power(0, &status) == true) && (YFY_SET_ID(0, 1, 2, 3, 4) != 0);
 }
 
 int main(int argc, char* argv[])
