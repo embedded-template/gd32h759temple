@@ -11,6 +11,64 @@
 #define DEVICE_ID 0x0A
 // 组设备号
 #define GROUP_DEVICE_ID 0x0B
+// 监控地址
+#define MONITOR_ADDR 0xF0
+// 广播地址
+#define BROADCAST_ADDR 0x3f
+
+/**
+ * @brief 32位数据组装宏
+ * @param error_code 错误码 (3 bits, 0-7)
+ * @param device_id 设备号 (4 bits, 0-15)
+ * @param cmd 命令号 (6 bits, 0-63)
+ * @param dest_addr 目的地址 (8 bits, 0-255)
+ * @param src_addr 源地址 (8 bits, 0-255)
+ * @return 组装后的32位数据
+ * @note 数据格式：[28:26]错误码 [25:22]设备号 [21:16]命令号 [15:8]目的地址 [7:0]源地址
+ */
+#define YFY_SET_ID(error_code, device_id, cmd, dest_addr, src_addr) \
+    ((uint32_t)(((error_code) & 0x07) << 26) | \
+     (uint32_t)(((device_id) & 0x0F) << 22) | \
+     (uint32_t)(((cmd) & 0x3F) << 16) | \
+     (uint32_t)(((dest_addr) & 0xFF) << 8) | \
+     (uint32_t)((src_addr) & 0xFF))
+
+/**
+ * @brief 从32位数据中提取错误码
+ * @param data 32位数据
+ * @return 错误码 (3 bits)
+ */
+#define YFY_EXTRACT_ERROR_CODE(data) (((data) >> 26) & 0x07)
+
+/**
+ * @brief 从32位数据中提取设备号
+ * @param data 32位数据
+ * @return 设备号 (4 bits)
+ */
+#define YFY_EXTRACT_DEVICE_ID(data) (((data) >> 22) & 0x0F)
+
+/**
+ * @brief 从32位数据中提取命令号
+ * @param data 32位数据
+ * @return 命令号 (6 bits)
+ */
+#define YFY_EXTRACT_CMD(data) (((data) >> 16) & 0x3F)
+
+/**
+ * @brief 从32位数据中提取目的地址
+ * @param data 32位数据
+ * @return 目的地址 (8 bits)
+ */
+#define YFY_EXTRACT_DEST_ADDR(data) (((data) >> 8) & 0xFF)
+
+/**
+ * @brief 从32位数据中提取源地址
+ * @param data 32位数据
+ * @return 源地址 (8 bits)
+ */
+#define YFY_EXTRACT_SRC_ADDR(data) ((data) & 0xFF)
+
+
 
 typedef struct module_data_t
 {
@@ -58,6 +116,8 @@ typedef struct module_data_t
     uint16_t external_voltage[MODULE_NUM];   // 外部电压
     uint16_t max_output_current[MODULE_NUM]; // 当前最大输出电流
 
+    //设置命令回复中的部分数据与读取重合，不进行处理。无用数据不处理。
+    uint8_t addr_modeL[MODULE_NUM]; // 模块地址模式
 } module_data_t;
 
 typedef struct group_module_data_t
@@ -118,8 +178,13 @@ typedef enum module_info_type_t
     eSysModuleInfo,
 } module_info_type_t;
 
-bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata);
+typedef struct yfy_module_handle_t
+{
+    bool (*send)(uint32_t id, uint8_t* pdata);
+    bool (*recv)(uint8_t id, uint8_t* pdata);
+}yfy_module_handle_t;
 
-module_data_t* get_module_data(void);
-group_module_data_t* get_group_module_data(void);
-sys_module_data_t* get_sys_module_data(void);
+void yfy_module_handle_init(yfy_module_handle_t* handle);
+yfy_module_handle_t* yfy_module_handle_get(void);
+
+void yfy_data_task(void);

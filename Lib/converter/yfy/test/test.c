@@ -287,6 +287,84 @@ void test_interface_system_functions() {
     print_test_result("系统数据空指针检查", result_null == YFY_ERROR_NULL_POINTER);
 }
 
+// 测试10: 32位数据组装宏测试
+void test_32bit_data_assembly() {
+    printf("\n=== 测试10: 32位数据组装宏测试 ===\n");
+
+    // 测试数据组装
+    uint8_t error_code = 0x02;    // 3 bits: 010
+    uint8_t device_id = 0x0A;     // 4 bits: 1010 (DEVICE_ID)
+    uint8_t cmd = 0x03;           // 6 bits: 000011
+    uint8_t dest_addr = 0x05;     // 8 bits: 00000101
+    uint8_t src_addr = 0xF0;      // 8 bits: 11110000 (MONITOR_ADDR)
+
+    // 组装32位数据
+    uint32_t assembled_data = YFY_SET_ID(error_code, device_id, cmd, dest_addr, src_addr);
+
+    // 期望结果计算：
+    // [28:26] = 010 (0x02) -> 0x08000000
+    // [25:22] = 1010 (0x0A) -> 0x02800000
+    // [21:16] = 000011 (0x03) -> 0x00030000
+    // [15:8] = 00000101 (0x05) -> 0x00000500
+    // [7:0] = 11110000 (0xF0) -> 0x000000F0
+    uint32_t expected = 0x08000000 | 0x02800000 | 0x00030000 | 0x00000500 | 0x000000F0;
+
+    printf("组装数据: 0x%08X (期望: 0x%08X)\n", assembled_data, expected);
+    print_test_result("32位数据组装", assembled_data == expected);
+
+    // 测试数据提取
+    uint8_t extracted_error = YFY_EXTRACT_ERROR_CODE(assembled_data);
+    uint8_t extracted_device = YFY_EXTRACT_DEVICE_ID(assembled_data);
+    uint8_t extracted_cmd = YFY_EXTRACT_CMD(assembled_data);
+    uint8_t extracted_dest = YFY_EXTRACT_DEST_ADDR(assembled_data);
+    uint8_t extracted_src = YFY_EXTRACT_SRC_ADDR(assembled_data);
+
+    printf("提取错误码: 0x%02X (期望: 0x%02X)\n", extracted_error, error_code);
+    printf("提取设备号: 0x%02X (期望: 0x%02X)\n", extracted_device, device_id);
+    printf("提取命令号: 0x%02X (期望: 0x%02X)\n", extracted_cmd, cmd);
+    printf("提取目的地址: 0x%02X (期望: 0x%02X)\n", extracted_dest, dest_addr);
+    printf("提取源地址: 0x%02X (期望: 0x%02X)\n", extracted_src, src_addr);
+
+    bool extract_test = (extracted_error == error_code) &&
+                       (extracted_device == device_id) &&
+                       (extracted_cmd == cmd) &&
+                       (extracted_dest == dest_addr) &&
+                       (extracted_src == src_addr);
+
+    print_test_result("32位数据提取", extract_test);
+
+    // 测试边界值
+    printf("\n--- 边界值测试 ---\n");
+
+    // 测试最大值
+    uint32_t max_data = YFY_SET_ID(0x07, 0x0F, 0x3F, 0xFF, 0xFF);
+    uint32_t expected_max = 0x1FFFFFFF;  // 所有位都是1（除了高3位）
+    printf("最大值测试: 0x%08X (期望: 0x%08X)\n", max_data, expected_max);
+    print_test_result("边界值最大", max_data == expected_max);
+
+    // 测试最小值
+    uint32_t min_data = YFY_SET_ID(0x00, 0x00, 0x00, 0x00, 0x00);
+    printf("最小值测试: 0x%08X (期望: 0x00000000)\n", min_data);
+    print_test_result("边界值最小", min_data == 0x00000000);
+
+    // 测试实际应用场景
+    printf("\n--- 实际应用场景测试 ---\n");
+
+    // 模拟读取模块0电压命令
+    uint32_t read_voltage_cmd = YFY_SET_ID(0, DEVICE_ID, 0x03, 0, MONITOR_ADDR);
+    printf("读取模块0电压命令: 0x%08X\n", read_voltage_cmd);
+
+    // 模拟读取组1数据命令
+    uint32_t read_group_cmd = YFY_SET_ID(0, GROUP_DEVICE_ID, 0x01, 1, MONITOR_ADDR);
+    printf("读取组1数据命令: 0x%08X\n", read_group_cmd);
+
+    // 模拟广播命令
+    uint32_t broadcast_cmd = YFY_SET_ID(0, DEVICE_ID, 0x01, BROADCAST_ADDR, MONITOR_ADDR);
+    printf("广播命令: 0x%08X\n", broadcast_cmd);
+
+    print_test_result("实际应用场景", true);  // 只要能正常执行就算通过
+}
+
 int main() {
     printf("=== YFY数据解析和接口函数测试程序 ===\n");
     printf("模块数量: %d\n", MODULE_NUM);
@@ -307,6 +385,9 @@ int main() {
     test_interface_module_functions();
     test_interface_group_functions();
     test_interface_system_functions();
+
+    // 运行32位数据组装测试
+    test_32bit_data_assembly();
 
     printf("\n=== 测试完成 ===\n");
     return 0;

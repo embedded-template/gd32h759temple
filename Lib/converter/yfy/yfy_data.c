@@ -2,8 +2,21 @@
 #include "string.h"
 #include "macro.h"
 
+static bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata);
 static bool yfy_data_unpack(module_info_type_t type, uint8_t cmd, uint8_t module_addr, uint8_t* p_data);
 static void yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_start, uint8_t bit_endd, uint8_t addr, uint8_t* pdata, void* pstore_data);
+
+yfy_module_handle_t yfy_module_handle = {0};
+
+void yfy_module_handle_init(yfy_module_handle_t* handle)
+{
+    yfy_module_handle = *handle;
+}
+
+yfy_module_handle_t* yfy_module_handle_get(void)
+{
+    return &yfy_module_handle;
+}
 
 /**
  * @defgroup 英飞源模块接收数据定义
@@ -74,7 +87,9 @@ module_info_t stModuleInfo[] = {
     {.cmd = 0x0A, .byte_start = 6, .byte_end = 8, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.max_power[0]},
 
     {.cmd = 0x0C, .byte_start = 0, .byte_end = 2, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.external_voltage[0]},
-    {.cmd = 0x0C, .byte_start = 2, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.max_output_current[0]}
+    {.cmd = 0x0C, .byte_start = 2, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.max_output_current[0]},
+
+    {.cmd = 0x1ff, .byte_start = 0, .byte_end = 1, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.addr_modeL[0]},
 
 };
 
@@ -95,6 +110,36 @@ set_moduole_inf_t stSetModuleInf[] = {
 /**
  * @}
  */
+
+
+ /**
+  * @brief 接收数据主任务
+  */
+ void yfy_data_task(void)
+ {
+     yfy_module_handle_t* handle = yfy_module_handle_get();
+     if (handle->recv == NULL)
+     {
+         return;
+     }
+     uint8_t id = 0;
+     uint8_t pdata[8] = {0};
+     for(int max_handle_count = 10; max_handle_count > 0; max_handle_count--)
+     {
+        if (handle->recv(id, pdata))
+        {
+            uint8_t dev_id = YFY_EXTRACT_DEVICE_ID(id);
+            uint8_t cmd = YFY_EXTRACT_CMD(id);
+            uint8_t module_addr = YFY_EXTRACT_SRC_ADDR(id);
+            yfy_data_parse(dev_id, cmd, module_addr, pdata);
+        }
+        else
+        {
+            break;
+        }
+     }
+ }
+
 
 /**
  * @brief 解析收到的数据
@@ -244,3 +289,47 @@ static void yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_sta
     }
 }
 
+/**
+ * @brief 发送读取命令
+ */
+void yfy_send_read_cmd(uint8_t dev_id, uint8_t cmd, uint8_t module_addr)
+{
+    // 组装32位命令数据
+    // 错误码设为0（正常），目的地址为模块地址，源地址为监控地址
+    uint32_t cmd_data = YFY_SET_ID(0, dev_id, cmd, module_addr, MONITOR_ADDR);
+
+    // 获取发送句柄
+    yfy_module_handle_t* handle = yfy_module_handle_get();
+
+    uint8_t send_data[8] = {0};
+    memcpy(send_data, &cmd_data, 8);
+    // 检查发送函数是否已初始化
+    if (handle != NULL && handle->send != NULL) {
+        // 将32位数据转换为字节数组发送
+
+        // 调用发送函数
+        handle->send(cmd_data, send_data);
+    }
+}
+
+/**
+ * @brief 发送设置命令
+ * 
+ */
+void yfy_send_write_cmd(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata)
+{
+    // 组装32位命令数据
+    // 错误码设为0（正常），目的地址为模块地址，源地址为监控地址
+    uint32_t cmd_data = YFY_SET_ID(0, dev_id, cmd, module_addr, MONITOR_ADDR);
+
+    // 获取发送句柄
+    yfy_module_handle_t* handle = yfy_module_handle_get();
+
+    // 检查发送函数是否已初始化
+    if (handle != NULL && handle->send != NULL) {
+        // 将32位数据转换为字节数组发送
+
+        // 调用发送函数
+        handle->send(cmd_data, pdata);
+    }
+}

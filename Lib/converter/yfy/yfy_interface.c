@@ -1,17 +1,12 @@
 #include "yfy_interface.h"
+#include <string.h>
 
-yfy_module_handle_t yfy_module_handle = {0};
 
-void yfy_module_handle_init(yfy_module_handle_t* handle)
-{
-    yfy_module_handle = *handle;
-}
-
-yfy_module_handle_t* yfy_module_handle_get(void)
-{
-    return &yfy_module_handle;
-}
-
+extern module_data_t* get_module_data(void);
+extern group_module_data_t* get_group_module_data(void);
+extern sys_module_data_t* get_sys_module_data(void);
+extern void yfy_send_read_cmd(uint8_t dev_id, uint8_t cmd, uint8_t module_addr);
+extern void yfy_send_write_cmd(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata);
 
 // 内部辅助函数：检查模块地址是否有效
 static bool is_valid_module_addr(uint8_t module_addr) {
@@ -776,6 +771,26 @@ yfy_result_t yfy_get_group_module_num(uint8_t group_num, uint8_t* module_num) {
     return YFY_OK;
 }
 
+/**
+ * @brief 读取指定模块的地址模式
+ * @param module_addr 模块地址 (0 ~ MODULE_NUM-1)
+ * @param addr_mode 地址模式指针，1=地址拨码，组号命令控制，0=地址自动分配，组号拨码控制
+ * @return yfy_result_t 操作结果
+ * @note 读取模块当前配置的地址模式，用于通讯管理
+ */
+yfy_result_t yfy_get_module_addr_mode(uint8_t module_addr, uint8_t* addr_mode) {
+    if (addr_mode == NULL) {
+        return YFY_ERROR_NULL_POINTER;
+    }
+    if (!is_valid_module_addr(module_addr)) {
+        return YFY_ERROR_INVALID_ADDR;
+    }
+
+    module_data_t* module_data = get_module_data();
+    *addr_mode = module_data->addr_modeL[module_addr];
+    return YFY_OK;
+}
+
 // ========== 第三类：读取系统数据的函数 ==========
 /**
  * @brief 读取整个系统的总电压
@@ -825,4 +840,430 @@ yfy_result_t yfy_get_sys_module_num(uint8_t* module_num) {
     return YFY_OK;
 }
 
- 
+// ========== 发送读取命令的函数 ==========
+/**
+ * @brief 读取系统输出
+ * 
+ */
+void yfy_send_read_sys_output(void)
+{
+    yfy_send_read_cmd(DEVICE_ID, 0x01, BROADCAST_ADDR);
+}
+
+/**
+ * @brief 读取系统模块数量
+ * 
+ */
+void yfy_send_read_sys_module_num(void)
+{
+    yfy_send_read_cmd(DEVICE_ID, 0x02, BROADCAST_ADDR);
+}
+
+/**
+ * @brief 读取组输出
+ * 
+ */
+void yfy_send_read_group_output(uint8_t module_addr)
+{
+    yfy_send_read_cmd(GROUP_DEVICE_ID, 0x01, module_addr);
+}
+
+/**
+ * @brief 读取组模块数量
+ * 
+ */
+void yfy_send_read_group_module_num(uint8_t module_addr)
+{
+    yfy_send_read_cmd(GROUP_DEVICE_ID, 0x02, module_addr);
+}
+
+/**
+ * @brief 读取单个模块输出
+ * 
+ */
+void yfy_send_read_single_output(uint8_t module_addr)
+{
+    yfy_send_read_cmd(DEVICE_ID, 0x03, module_addr);
+}
+
+/**
+ * @brief 读取组内模块输出
+ * 
+ */
+void yfy_send_read_single_output_by_group(uint8_t group_num)
+{
+    yfy_send_read_cmd(GROUP_DEVICE_ID, 0x03, group_num);
+}
+
+/**
+ * @brief 读取单个模块信息1：模块组号、温度、状态表2，状态表1，状态表0
+ * 
+ */
+void yfy_send_read_single_info_1(uint8_t module_addr)
+{
+    yfy_send_read_cmd(DEVICE_ID, 0x04, module_addr);
+}
+
+/**
+ * @brief 读取组内模块信息1：模块组号、温度、状态表2，状态表1，状态表0
+ * 
+ */
+void yfy_send_read_single_info_1_by_group(uint8_t group_num)
+{
+    yfy_send_read_cmd(GROUP_DEVICE_ID, 0x04, group_num);
+}
+
+/**
+ * @brief 读取单个模块信息2：交流输入电压AB、BC、CA相电压
+ * 
+ */
+void yfy_send_read_single_info_2(uint8_t module_addr)
+{
+    yfy_send_read_cmd(DEVICE_ID, 0x06, module_addr);
+}
+
+/**
+ * @brief 读取组内模块信息2：交流输入电压AB、BC、CA相电压
+ * 
+ */
+void yfy_send_read_single_info_2_by_group(uint8_t group_num)
+{
+    yfy_send_read_cmd(GROUP_DEVICE_ID, 0x06, group_num);
+}
+
+/**
+ * @brief 读取单个模块信息3：最大电压、最小电压、最大电流、额定功率
+ * 
+ */
+void yfy_send_read_single_info_3(uint8_t module_addr)
+{
+    yfy_send_read_cmd(DEVICE_ID, 0x0A, module_addr);
+}
+
+/**
+ * @brief 读取组内模块信息3：最大电压、最小电压、最大电流、额定功率
+ * 
+ */
+void yfy_send_read_single_info_3_by_group(uint8_t group_num)
+{
+    yfy_send_read_cmd(GROUP_DEVICE_ID, 0x0A, group_num);
+}
+
+/**
+ * @brief 读取单个模块信息4：条形码
+ * 
+ */
+void yfy_send_read_single_info_4(uint8_t module_addr)
+{
+    yfy_send_read_cmd(DEVICE_ID, 0x0B, module_addr);
+}
+
+/**
+ * @brief 读取组内模块信息4：条形码
+ * 
+ */
+void yfy_send_read_single_info_4_by_group(uint8_t group_num)
+{
+    yfy_send_read_cmd(GROUP_DEVICE_ID, 0x0B, group_num);
+}
+
+/**
+ * @brief 读取单个模块信息4：外部电压、当前最大输出电流
+ * 
+ */
+void yfy_send_read_single_info_5(uint8_t module_addr)
+{
+    yfy_send_read_cmd(DEVICE_ID, 0x0C, module_addr);
+}
+
+/**
+ * @brief 读取组内模块信息4：外部电压、当前最大输出电流
+ * 
+ */
+void yfy_send_read_single_info_5_by_group(uint8_t group_num)
+{
+    yfy_send_read_cmd(GROUP_DEVICE_ID, 0x0C, group_num);
+}
+
+// ========== 发送设置命令的函数 ==========
+/**
+ * @brief 设置系统WALK-IN使能状态
+ * @param enable 使能状态，0=禁用，1=使能
+ * 
+ */
+void yfy_send_write_sys_WalkIn(bool enable)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = (uint8_t)enable;
+    yfy_send_write_cmd(DEVICE_ID, 0x13, BROADCAST_ADDR, pdata);
+}
+
+/**
+ * @brief 设置组WALK-IN使能状态
+ * @param group_num 组号
+ * @param enable 使能状态，0=禁用，1=使能
+ */
+void yfy_send_write_WalkIn_by_group(uint8_t group_num, bool enable)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = (uint8_t)enable;
+    yfy_send_write_cmd(GROUP_DEVICE_ID, 0x13, group_num, pdata);
+}
+
+/**
+ * @brief 设置单个模块WALK-IN使能状态
+ * @param module_addr 模块地址
+ * @param enable 使能状态，0=禁用，1=使能
+ */
+void yfy_send_write_single_WalkIn(uint8_t module_addr, bool enable)
+{
+
+    uint8_t pdata[8] = {0};
+    pdata[0] = (uint8_t)enable;
+    yfy_send_write_cmd(DEVICE_ID, 0x13, module_addr, pdata);
+}
+
+/**
+ * @brief 设置系统绿灯闪烁使能状态
+ * @param enable 使能状态，0=禁用，1=使能
+ */
+void yfy_send_write_sys_green_led_blink(bool enable)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = (uint8_t)enable;
+    yfy_send_write_cmd(DEVICE_ID, 0x14, BROADCAST_ADDR, pdata);
+}
+
+/**
+ * @brief 设置组绿灯闪烁使能状态
+ * @param group_num 组号
+ * @param enable 使能状态，0=禁用，1=使能
+ */
+void yfy_send_write_green_led_blink_by_group(uint8_t group_num, bool enable)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = (uint8_t)enable;
+    yfy_send_write_cmd(GROUP_DEVICE_ID, 0x14, group_num, pdata);
+}
+
+/**
+ * @brief 设置单个模块绿灯闪烁使能状态
+ * @param module_addr 模块地址
+ * @param enable 使能状态，0=禁用，1=使能
+ */
+void yfy_send_write_single_green_led_blink(uint8_t module_addr, bool enable)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = (uint8_t)enable;
+    yfy_send_write_cmd(DEVICE_ID, 0x14, module_addr, pdata);
+}
+
+/**
+ * @brief 设置系统组号
+ * @param group_num 组号
+ */
+void yfy_send_write_sys_group_num(uint8_t group_num)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = group_num;
+    yfy_send_write_cmd(DEVICE_ID, 0x16, BROADCAST_ADDR, pdata);
+}
+
+/**
+ * @brief 设置组内模块组号
+ * @param group_num 组号
+ * @param new_group_num 新组号
+ */
+void yfy_send_write_group_num_by_group(uint8_t group_num, uint8_t new_group_num)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = new_group_num;
+    yfy_send_write_cmd(GROUP_DEVICE_ID, 0x16, group_num, pdata);
+}
+
+/**
+ * @brief 设置单个模块组号
+ * @param module_addr 模块地址
+ * @param group_num 组号
+ */
+void yfy_send_write_single_group_num(uint8_t module_addr, uint8_t group_num)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = group_num;
+    yfy_send_write_cmd(DEVICE_ID, 0x16, module_addr, pdata);
+}
+
+/**
+ * @brief 设置系统休眠使能状态
+ * @param enable 使能状态，0=禁用，1=使能
+ */
+void yfy_send_write_sys_sleep(bool enable)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = (uint8_t)enable;
+    yfy_send_write_cmd(DEVICE_ID, 0x19, BROADCAST_ADDR, pdata);
+}
+
+/**
+ * @brief 设置组休眠使能状态
+ * @param group_num 组号
+ * @param enable 使能状态，0=禁用，1=使能
+ */
+void yfy_send_write_sleep_by_group(uint8_t group_num, bool enable)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = (uint8_t)enable;
+    yfy_send_write_cmd(GROUP_DEVICE_ID, 0x19, group_num, pdata);
+}
+
+/**
+ * @brief 设置单个模块休眠使能状态
+ * @param module_addr 模块地址
+ * @param enable 使能状态，0=禁用，1=使能
+ */
+void yfy_send_write_single_sleep(uint8_t module_addr, bool enable)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = (uint8_t)enable;
+    yfy_send_write_cmd(DEVICE_ID, 0x19, module_addr, pdata);
+}
+
+/**
+ * @brief 设置系统工作使能状态
+ * @param enable 使能状态，0=禁用，1=使能
+ */
+void yfy_send_write_sys_work(bool enable)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = (uint8_t)enable;
+    yfy_send_write_cmd(DEVICE_ID, 0x1A, BROADCAST_ADDR, pdata);
+}
+
+/**
+ * @brief 设置组工作使能状态
+ * @param group_num 组号
+ * @param enable 使能状态，0=禁用，1=使能
+ */
+void yfy_send_write_work_by_group(uint8_t group_num, bool enable)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = (uint8_t)enable;
+    yfy_send_write_cmd(GROUP_DEVICE_ID, 0x1A, group_num, pdata);
+}
+
+/**
+ * @brief 设置单个模块工作使能状态
+ * @param module_addr 模块地址
+ * @param enable 使能状态，0=禁用，1=使能
+ */
+void yfy_send_write_single_work(uint8_t module_addr, bool enable)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = (uint8_t)enable;
+    yfy_send_write_cmd(DEVICE_ID, 0x1A, module_addr, pdata);
+}
+
+/**
+ * @brief 设置系统输出电压和电流
+ * @param volt 输出电压，单位：mV (毫伏)
+ * @param current 输出电流，单位：mA (毫安)
+ */
+void yfy_send_write_sys_output_all(uint32_t volt, uint32_t current)
+{
+    uint8_t pdata[8] = {0};
+    memcpy(pdata, &volt, 4);
+    memcpy(pdata + 4, &current, 4);
+    yfy_send_write_cmd(DEVICE_ID, 0x1B, BROADCAST_ADDR, pdata);
+}
+
+/**
+ * @brief 设置组输出电压和电流
+ * @param group_num 组号
+ * @param volt 输出电压，单位：mV (毫伏)
+ * @param current 输出电流，单位：mA (毫安)
+ */
+void yfy_send_write_output_all_by_group(uint8_t group_num, uint32_t volt, uint32_t current)
+{
+    uint8_t pdata[8] = {0};
+    memcpy(pdata, &volt, 4);
+    memcpy(pdata + 4, &current, 4);
+    yfy_send_write_cmd(GROUP_DEVICE_ID, 0x1B, group_num, pdata);
+}
+
+/**
+ * @brief 设置单个模块输出电压和电流
+ * @param module_addr 模块地址
+ * @param volt 输出电压，单位：mV (毫伏)
+ * @param current 输出电流，单位：mA (毫安)
+ */
+void yfy_send_write_sys_output(uint32_t volt, uint32_t current)
+{
+    uint8_t pdata[8] = {0};
+    memcpy(pdata, &volt, 4);
+    memcpy(pdata + 4, &current, 4);
+    yfy_send_write_cmd(DEVICE_ID, 0x1C, BROADCAST_ADDR, pdata);
+}
+
+/**
+ * @brief 设置组内模块输出电压和电流
+ * @param group_num 组号
+ * @param volt 输出电压，单位：mV (毫伏)
+ * @param current 输出电流，单位：mA (毫安)
+ */
+void yfy_send_write_output_by_group(uint8_t group_num, uint32_t volt, uint32_t current)
+{
+    uint8_t pdata[8] = {0};
+    memcpy(pdata, &volt, 4);
+    memcpy(pdata + 4, &current, 4);
+    yfy_send_write_cmd(GROUP_DEVICE_ID, 0x1C, group_num, pdata);
+}
+
+/**
+ * @brief 设置单个模块输出电压和电流
+ * @param module_addr 模块地址
+ * @param volt 输出电压，单位：mV (毫伏)
+ * @param current 输出电流，单位：mA (毫安)
+ */
+void yfy_send_write_single_output(uint8_t module_addr, uint32_t volt, uint32_t current)
+{
+    uint8_t pdata[8] = {0};
+    memcpy(pdata, &volt, 4);
+    memcpy(pdata + 4, &current, 4);
+    yfy_send_write_cmd(DEVICE_ID, 0x1C, module_addr, pdata);
+}
+
+/**
+ * @brief 设置系统地址模式
+ * @param model 地址模式，0=地址自动分配，组号拨码控制，1=地址拨码，组号命令控制
+ */
+void yfy_send_write_sys_addr_model(uint8_t model)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = model;
+    yfy_send_write_cmd(DEVICE_ID, 0x1F, BROADCAST_ADDR, pdata);
+}
+
+/**
+ * @brief 设置组地址模式
+ * @param group_num 组号
+ * @param model 地址模式，0=地址自动分配，组号拨码控制，1=地址拨码，组号命令控制
+ */
+void yfy_send_write_addr_model_by_group(uint8_t group_num, uint8_t model)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = model;
+    yfy_send_write_cmd(GROUP_DEVICE_ID, 0x1F, group_num, pdata);
+}
+
+/**
+ * @brief 设置单个模块地址模式
+ * @param module_addr 模块地址
+ * @param model 地址模式，0=地址自动分配，组号拨码控制，1=地址拨码，组号命令控制
+ */
+void yfy_send_write_single_addr_model(uint8_t module_addr, uint8_t model)
+{
+    uint8_t pdata[8] = {0};
+    pdata[0] = model;
+    yfy_send_write_cmd(DEVICE_ID, 0x1F, module_addr, pdata);
+}
+

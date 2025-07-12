@@ -11,15 +11,6 @@ typedef enum {
 } yfy_result_t;
 
 
-typedef struct yfy_module_handle_t
-{
-    bool (*send)(uint32_t id, uint8_t* pdata);
-    bool (*recv)(uint8_t id, uint8_t* pdata);
-}yfy_module_handle_t;
-
-void yfy_module_handle_init(yfy_module_handle_t* handle);
-yfy_module_handle_t* yfy_module_handle_get(void);
-
 // ========== 第一类：读取单个模块数据的函数 ==========
 // 基本数据读取
 yfy_result_t yfy_get_module_voltage(uint8_t module_addr, float* voltage);
@@ -68,6 +59,7 @@ yfy_result_t yfy_get_max_power(uint8_t module_addr, uint16_t* power);
 // 其他参数读取
 yfy_result_t yfy_get_external_voltage(uint8_t module_addr, uint16_t* voltage);
 yfy_result_t yfy_get_max_output_current(uint8_t module_addr, uint16_t* current);
+yfy_result_t yfy_get_module_addr_mode(uint8_t module_addr, uint8_t* addr_mode);
 
 // ========== 第二类：读取模块组数据的函数 ==========
 yfy_result_t yfy_get_group_voltage(uint8_t group_num, float* voltage);
@@ -78,3 +70,47 @@ yfy_result_t yfy_get_group_module_num(uint8_t group_num, uint8_t* module_num);
 yfy_result_t yfy_get_sys_voltage(float* voltage);
 yfy_result_t yfy_get_sys_current(float* current);
 yfy_result_t yfy_get_sys_module_num(uint8_t* module_num);
+
+// ========== 发送读取命令的函数 ==========
+void yfy_send_read_sys_output(void);
+void yfy_send_read_sys_module_num(void);
+void yfy_send_read_group_output(uint8_t module_addr);
+void yfy_send_read_group_module_num(uint8_t module_addr);
+void yfy_send_read_single_output(uint8_t module_addr);
+void yfy_send_read_single_output_by_group(uint8_t group_num);
+void yfy_send_read_single_info_1(uint8_t module_addr);
+void yfy_send_read_single_info_1_by_group(uint8_t group_num);
+void yfy_send_read_single_info_2(uint8_t module_addr);
+void yfy_send_read_single_info_2_by_group(uint8_t group_num);
+void yfy_send_read_single_info_3(uint8_t module_addr);
+void yfy_send_read_single_info_3_by_group(uint8_t group_num);
+void yfy_send_read_single_info_4(uint8_t module_addr);
+void yfy_send_read_single_info_4_by_group(uint8_t group_num);
+void yfy_send_read_single_info_5(uint8_t module_addr);
+void yfy_send_read_single_info_5_by_group(uint8_t group_num);
+
+// ========== 发送设置命令的函数 ==========
+void yfy_send_write_sys_WalkIn(bool enable);
+void yfy_send_write_WalkIn_by_group(uint8_t group_num, bool enable);
+void yfy_send_write_single_WalkIn(uint8_t module_addr, bool enable);
+void yfy_send_write_sys_green_led_blink(bool enable);
+void yfy_send_write_green_led_blink_by_group(uint8_t group_num, bool enable);
+void yfy_send_write_single_green_led_blink(uint8_t module_addr, bool enable);
+void yfy_send_write_sys_group_num(uint8_t group_num);
+void yfy_send_write_group_num_by_group(uint8_t group_num, uint8_t new_group_num);
+void yfy_send_write_single_group_num(uint8_t module_addr, uint8_t group_num);
+void yfy_send_write_sys_sleep(bool enable);
+void yfy_send_write_sleep_by_group(uint8_t group_num, bool enable);
+void yfy_send_write_single_sleep(uint8_t module_addr, bool enable);
+void yfy_send_write_sys_work(bool enable);
+void yfy_send_write_work_by_group(uint8_t group_num, bool enable);
+void yfy_send_write_single_work(uint8_t module_addr, bool enable);
+void yfy_send_write_sys_output_all(uint32_t volt, uint32_t current);
+void yfy_send_write_output_all_by_group(uint8_t group_num, uint32_t volt, uint32_t current);
+void yfy_send_write_sys_output(uint32_t volt, uint32_t current);
+void yfy_send_write_output_by_group(uint8_t group_num, uint32_t volt, uint32_t current);
+void yfy_send_write_single_output(uint8_t module_addr, uint32_t volt, uint32_t current);
+void yfy_send_write_sys_addr_model(uint8_t model);
+void yfy_send_write_addr_model_by_group(uint8_t group_num, uint8_t model);
+void yfy_send_write_single_addr_model(uint8_t module_addr, uint8_t model);
+
