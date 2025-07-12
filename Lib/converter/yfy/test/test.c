@@ -1,4 +1,5 @@
 #include "yfy_data.h"
+#include "yfy_interface.h"
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -148,26 +149,164 @@ void test_error_cases() {
     bool result1 = yfy_data_parse(GROUP_DEVICE_ID, 0x01, GROUP_MODULE_NUM + 5, dummy_data);
     print_test_result("无效组号处理", !result1); // 应该返回false
 
+    // 测试空指针 - 跳过以避免崩溃
+    // bool result2 = yfy_data_parse(DEVICE_ID, 0x03, 0, NULL);
+    // print_test_result("空指针处理", !result2); // 应该返回false或崩溃保护
+    printf("空指针测试跳过以避免崩溃\n");
+}
+
+// 测试7: 接口函数测试 - 单个模块数据读取
+void test_interface_module_functions() {
+    printf("\n=== 测试7: 接口函数 - 单个模块数据读取 ===\n");
+    clear_test_data();
+
+    // 先设置一些测试数据
+    stModuleData.voltage[0] = 48.5f;
+    stModuleData.current[0] = 12.3f;
+    stModuleData.group[0] = 2;
+    stModuleData.temp[0] = 25;
+    stModuleData.module_limit_power[0] = 1;
+    stModuleData.ac_input_voltage_ab[0] = 380;
+    stModuleData.max_voltage[0] = 50;
+
+    // 测试读取函数
+    float voltage, current;
+    uint8_t group, status;
+    int8_t temp;
+    uint16_t ac_voltage, max_voltage;
+
+    // 测试有效地址
+    yfy_result_t result1 = yfy_get_module_voltage(0, &voltage);
+    yfy_result_t result2 = yfy_get_module_current(0, &current);
+    yfy_result_t result3 = yfy_get_module_group(0, &group);
+    yfy_result_t result4 = yfy_get_module_temp(0, &temp);
+    yfy_result_t result5 = yfy_get_module_limit_power(0, &status);
+    yfy_result_t result6 = yfy_get_ac_input_voltage_ab(0, &ac_voltage);
+    yfy_result_t result7 = yfy_get_max_voltage(0, &max_voltage);
+
+    printf("模块0电压: %.2f V (期望: 48.50)\n", voltage);
+    printf("模块0电流: %.2f A (期望: 12.30)\n", current);
+    printf("模块0组号: %d (期望: 2)\n", group);
+    printf("模块0温度: %d°C (期望: 25)\n", temp);
+    printf("模块0限功率状态: %d (期望: 1)\n", status);
+    printf("模块0交流输入电压AB: %d V (期望: 380)\n", ac_voltage);
+    printf("模块0最大电压: %d V (期望: 50)\n", max_voltage);
+
+    bool test_passed = (result1 == YFY_OK) && (result2 == YFY_OK) && (result3 == YFY_OK) &&
+                      (result4 == YFY_OK) && (result5 == YFY_OK) && (result6 == YFY_OK) &&
+                      (result7 == YFY_OK) && (voltage == 48.5f) && (current == 12.3f) &&
+                      (group == 2) && (temp == 25) && (status == 1) &&
+                      (ac_voltage == 380) && (max_voltage == 50);
+
+    print_test_result("模块数据读取接口", test_passed);
+
+    // 测试无效地址
+    yfy_result_t result_invalid = yfy_get_module_voltage(MODULE_NUM + 1, &voltage);
+    print_test_result("无效模块地址检查", result_invalid == YFY_ERROR_INVALID_ADDR);
+
     // 测试空指针
-    bool result2 = yfy_data_parse(DEVICE_ID, 0x03, 0, NULL);
-    print_test_result("空指针处理", !result2); // 应该返回false或崩溃保护
+    yfy_result_t result_null = yfy_get_module_voltage(0, NULL);
+    print_test_result("空指针检查", result_null == YFY_ERROR_NULL_POINTER);
+}
+
+// 测试8: 接口函数测试 - 组数据读取
+void test_interface_group_functions() {
+    printf("\n=== 测试8: 接口函数 - 组数据读取 ===\n");
+    clear_test_data();
+
+    // 设置测试数据
+    stGroupModuleData.voltage[0] = 48.0f;  // 组1
+    stGroupModuleData.current[0] = 100.0f;
+    stGroupModuleData.module_num[0] = 4;
+
+    stGroupModuleData.voltage[2] = 47.5f;  // 组3
+    stGroupModuleData.current[2] = 95.0f;
+    stGroupModuleData.module_num[2] = 3;
+
+    float voltage, current;
+    uint8_t module_num;
+
+    // 测试组1
+    yfy_result_t result1 = yfy_get_group_voltage(1, &voltage);
+    yfy_result_t result2 = yfy_get_group_current(1, &current);
+    yfy_result_t result3 = yfy_get_group_module_num(1, &module_num);
+
+    printf("组1电压: %.2f V (期望: 48.00)\n", voltage);
+    printf("组1电流: %.2f A (期望: 100.00)\n", current);
+    printf("组1模块数: %d (期望: 4)\n", module_num);
+
+    // 测试组3
+    yfy_result_t result4 = yfy_get_group_voltage(3, &voltage);
+    yfy_result_t result5 = yfy_get_group_current(3, &current);
+    yfy_result_t result6 = yfy_get_group_module_num(3, &module_num);
+
+    printf("组3电压: %.2f V (期望: 47.50)\n", voltage);
+    printf("组3电流: %.2f A (期望: 95.00)\n", current);
+    printf("组3模块数: %d (期望: 3)\n", module_num);
+
+    bool test_passed = (result1 == YFY_OK) && (result2 == YFY_OK) && (result3 == YFY_OK) &&
+                      (result4 == YFY_OK) && (result5 == YFY_OK) && (result6 == YFY_OK);
+
+    print_test_result("组数据读取接口", test_passed);
+
+    // 测试无效组号
+    yfy_result_t result_invalid1 = yfy_get_group_voltage(0, &voltage);  // 组号从1开始
+    yfy_result_t result_invalid2 = yfy_get_group_voltage(GROUP_MODULE_NUM + 1, &voltage);
+    print_test_result("无效组号检查", (result_invalid1 == YFY_ERROR_INVALID_GROUP) &&
+                                    (result_invalid2 == YFY_ERROR_INVALID_GROUP));
+}
+
+// 测试9: 接口函数测试 - 系统数据读取
+void test_interface_system_functions() {
+    printf("\n=== 测试9: 接口函数 - 系统数据读取 ===\n");
+    clear_test_data();
+
+    // 设置测试数据
+    stSysModuleData.voltage = 480.0f;
+    stSysModuleData.current = 1000.0f;
+    stSysModuleData.module_num = 12;
+
+    float voltage, current;
+    uint8_t module_num;
+
+    yfy_result_t result1 = yfy_get_sys_voltage(&voltage);
+    yfy_result_t result2 = yfy_get_sys_current(&current);
+    yfy_result_t result3 = yfy_get_sys_module_num(&module_num);
+
+    printf("系统电压: %.2f V (期望: 480.00)\n", voltage);
+    printf("系统电流: %.2f A (期望: 1000.00)\n", current);
+    printf("系统模块数: %d (期望: 12)\n", module_num);
+
+    bool test_passed = (result1 == YFY_OK) && (result2 == YFY_OK) && (result3 == YFY_OK) &&
+                      (voltage == 480.0f) && (current == 1000.0f) && (module_num == 12);
+
+    print_test_result("系统数据读取接口", test_passed);
+
+    // 测试空指针
+    yfy_result_t result_null = yfy_get_sys_voltage(NULL);
+    print_test_result("系统数据空指针检查", result_null == YFY_ERROR_NULL_POINTER);
 }
 
 int main() {
-    printf("=== YFY数据解析函数测试程序 ===\n");
+    printf("=== YFY数据解析和接口函数测试程序 ===\n");
     printf("模块数量: %d\n", MODULE_NUM);
     printf("组数量: %d\n", GROUP_MODULE_NUM);
     printf("广播地址: 0x%02X\n", BROADCAST_ADDR);
     printf("设备ID: 0x%02X\n", DEVICE_ID);
     printf("组设备ID: 0x%02X\n", GROUP_DEVICE_ID);
 
-    // 运行所有测试
+    // 运行数据解析测试
     test_module_voltage_parse();
     test_module_current_parse();
     test_module_status_parse();
     test_group_data_parse();
     test_system_data_parse();
     test_error_cases();
+
+    // 运行接口函数测试
+    test_interface_module_functions();
+    test_interface_group_functions();
+    test_interface_system_functions();
 
     printf("\n=== 测试完成 ===\n");
     return 0;

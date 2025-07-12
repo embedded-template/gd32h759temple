@@ -109,7 +109,7 @@ bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* p
         if (module_addr == BROADCAST_ADDR)
         {
             // 数据为系统
-            yfy_data_unpack(eSysModuleInfo, cmd, module_addr, pdata);
+            return yfy_data_unpack(eSysModuleInfo, cmd, module_addr, pdata);
         }
         else if (dev_id == GROUP_DEVICE_ID)
         {
@@ -119,14 +119,17 @@ bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* p
                 return false;
             }
             //组编号从1开始
-            yfy_data_unpack(eGroupModuleInfo, cmd, (module_addr - 1), pdata);
+            return yfy_data_unpack(eGroupModuleInfo, cmd, (module_addr - 1), pdata);
         }
     }
     else
     {
         // 数据为单个模块
-        yfy_data_unpack(eModuleInfo, cmd, module_addr, pdata);
-        return false;
+        if(module_addr >= MODULE_NUM)
+        {
+            return false;
+        }
+        return yfy_data_unpack(eModuleInfo, cmd, module_addr, pdata);
     }
 }
 
