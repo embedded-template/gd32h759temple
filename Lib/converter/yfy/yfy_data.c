@@ -20,7 +20,6 @@ yfy_module_handle_t* yfy_module_handle_get(void)
 
 /**
  * @defgroup 英飞源模块接收数据定义
- * @brief 不读条形码
  * @{
  */
 module_data_t stModuleData = {0};
