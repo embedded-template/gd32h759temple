@@ -340,7 +340,7 @@
               <MiscControls>-Wno-invalid-source-encoding -fno-finite-math-only</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\Firmware\CMSIS\GD\GD32H7xx\Include;..\Firmware\GD32H7xx_standard_peripheral\Include;..\freeRtos\kernel\include;..\freeRtos\kernel\portable\GCC\ARM_CM7\r0p1;..\User;..\Lib\ring_buffer;..\Lib\logging;..\Lib\cli;..\Driver</IncludePath>
+              <IncludePath>..\Firmware\CMSIS\GD\GD32H7xx\Include;..\Firmware\GD32H7xx_standard_peripheral\Include;..\freeRtos\kernel\include;..\freeRtos\kernel\portable\GCC\ARM_CM7\r0p1;..\User;..\Lib;..\Lib\converter;..\Lib\converter\yfy;..\Lib\ring_buffer;..\Lib\logging;..\Lib\cli;..\Driver</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -416,6 +416,21 @@
               <FileName>cli.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Lib\cli\cli.c</FilePath>
+            </File>
+            <File>
+              <FileName>power_interface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\converter\power_interface.c</FilePath>
+            </File>
+            <File>
+              <FileName>yfy_interface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\converter\yfy\yfy_interface.c</FilePath>
+            </File>
+            <File>
+              <FileName>yfy_data.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\converter\yfy\yfy_data.c</FilePath>
             </File>
           </Files>
         </Group>

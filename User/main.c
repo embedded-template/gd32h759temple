@@ -72,7 +72,7 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
     g_stack_overflow_count++;
 
     /* 输出错误信息 */
-    console_t* console = get_console();
+    uart_handle_t* console = get_console();
     console->bReady = false;
     printf("任务:%s stack 溢出, task handle: 0x%08lX, Count: %d\r\n", (char*) g_overflow_task_name, (unsigned long) g_overflow_task_handle,
            g_stack_overflow_count);

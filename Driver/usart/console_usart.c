@@ -14,9 +14,9 @@ __attribute__((aligned(32))) uint8_t tx_buffer[CONSOLE_DMA_BUFFER_TX_SIZE];
 RING_BUFF_PRE_INIT(console_rx, CONSOLE_RING_BUFFER_RX_SIZE);
 RING_BUFF_PRE_INIT(console_tx, CONSOLE_RING_BUFFER_TX_SIZE);
 
-console_t console = {0};
+uart_handle_t console = {0};
 
-console_t* get_console(void)
+uart_handle_t* get_console(void)
 {
     return &console;
 }

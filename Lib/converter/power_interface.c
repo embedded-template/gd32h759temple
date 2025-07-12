@@ -100,7 +100,7 @@ void power_interface_pre_init(void)
 void power_control_task(void* pvParameters)
 {
     power_interface_pre_init();
-
+    power_interface_init(eModuleTypeYfy);
     while (1)
     {
         // TODO:增加接口判断机制。先初始化一个接口，并发送数据，如果没有回复，则说明接口不匹配，再初始化下一个接口。

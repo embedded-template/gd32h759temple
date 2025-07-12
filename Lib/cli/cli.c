@@ -161,7 +161,7 @@ void CLI_Task(void* pvParameters)
     for (;;)
     {
 
-        console_t* console = get_console();
+        uart_handle_t* console = get_console();
 
         if (console->rx_ring_buffer->read((uint8_t*) &cRxedChar, 1, 10) == 1)
         {
