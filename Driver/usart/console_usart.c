@@ -133,21 +133,7 @@ void console_rx_dma_config(void)
     dma_interrupt_enable(DMA0, DMA_CH1, DMA_INT_FTF);
     nvic_irq_enable(DMA0_Channel1_IRQn, 2, 0);
 }
-/**
- * @brief console初始化
- *
- */
-void console_init(void)
-{
-    console.rx_ring_buffer = console_rx_ring_buff();
-    console.tx_ring_buffer = console_tx_ring_buff();
-    console.rx_dma_buffer.buffer = rx_buffer;
-    console.tx_dma_buffer.buffer = tx_buffer;
-    console.bReady = true;
-    console_uart_init();
-    console_tx_dma_config();
-    console_rx_dma_config();
-}
+
 /**
  * @brief console接收任务
  *
@@ -320,7 +306,7 @@ void CONSOLE_USART_IRQ_HANDLER(void)
  * @brief console任务
  *
  */
-void console_task(void* pvParameters)
+void console_task_init(void)
 {
     xTaskCreate(console_rx_task, "console_rx", 50, NULL, 5, NULL);
     xTaskCreate(console_tx_task, "console_tx", 50, NULL, 5, NULL);
@@ -328,6 +314,21 @@ void console_task(void* pvParameters)
 #ifdef CONSOLE_TEST
     xTaskCreate(console_test, "console_test", 200, NULL, 5, NULL);
 #endif
+}
 
-    vTaskDelete(NULL);
+/**
+ * @brief console初始化
+ *
+ */
+void console_init(void)
+{
+    console.rx_ring_buffer = console_rx_ring_buff();
+    console.tx_ring_buffer = console_tx_ring_buff();
+    console.rx_dma_buffer.buffer = rx_buffer;
+    console.tx_dma_buffer.buffer = tx_buffer;
+    console.bReady = true;
+    console_uart_init();
+    console_tx_dma_config();
+    console_rx_dma_config();
+    console_task_init();
 }

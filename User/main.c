@@ -9,7 +9,6 @@
 #include <string.h>
 
 task_info_t task_info_all[] = {
-    {console_task, NAME_console_task, STACK_console_task, PARAM_console_task, PRIORITY_console_task, NULL},
     {CLI_Task, NAME_cli_task, STACK_cli_task, PARAM_cli_task, PRIORITY_cli_task, NULL},
     {power_control_task, NAME_power_control_task, STACK_power_control_task, PARAM_power_control_task, PRIORITY_power_control_task, NULL}};
 

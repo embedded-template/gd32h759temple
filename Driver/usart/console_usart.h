@@ -34,7 +34,5 @@
 RING_BUFF_EXTERN(console_rx)
 RING_BUFF_EXTERN(console_tx)
 
-
-void console_task(void* pvParameters);
 void console_init(void);
 uart_handle_t* get_console(void);
