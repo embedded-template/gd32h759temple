@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include "can/module_can.h"
 
 task_info_t task_info_all[] = {
     {CLI_Task, NAME_cli_task, STACK_cli_task, PARAM_cli_task, PRIORITY_cli_task, NULL},
@@ -41,6 +42,7 @@ int main(void)
     cache_enable();
 
     console_init();
+    module_can_init();
 
     for (int i = 0; i < TASK_NUM; i++)
     {
