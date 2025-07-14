@@ -1,6 +1,6 @@
 #include "yfy_data.h"
-#include "utilities/macro.h"
 #include "string.h"
+#include "utilities/macro.h"
 #include <stdint.h>
 
 static bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata);

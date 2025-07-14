@@ -2,8 +2,8 @@
 
 #include "gd32h7xx.h"
 #include "ring_buffer.h"
-#include <stdio.h>
 #include "uart.h"
+#include <stdio.h>
 
 #define CONSOLE_USARTX_MODE 0
 
