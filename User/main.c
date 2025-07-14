@@ -24,6 +24,15 @@ void vTask1(void* pvParameters)
     }
 }
 
+
+void cache_enable(void)
+{
+    /* enable I-Cache */
+    SCB_EnableICache();
+    /* enable D-Cache */
+    SCB_EnableDCache();
+}
+
 int main(void)
 {
     uint8_t ucaRxBuf[256];
@@ -31,6 +40,8 @@ int main(void)
 
     nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
 
+    cache_enable();
+    
     console_init();
 
     for (int i = 0; i < TASK_NUM; i++)

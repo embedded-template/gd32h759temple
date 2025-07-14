@@ -1,5 +1,0 @@
-#include "module.h"
-
-RING_BUFF_PRE_INIT(module_rx, MODULE_RING_BUFFER_RX_SIZE);
-RING_BUFF_PRE_INIT(module_tx, MODULE_RING_BUFFER_TX_SIZE);
-
