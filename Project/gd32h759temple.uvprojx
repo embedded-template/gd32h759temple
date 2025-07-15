@@ -423,11 +423,6 @@
               <FilePath>..\Lib\cli\cli.c</FilePath>
             </File>
             <File>
-              <FileName>power_interface.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Lib\converter\power_interface.c</FilePath>
-            </File>
-            <File>
               <FileName>yfy_interface.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Lib\converter\yfy\yfy_interface.c</FilePath>
@@ -436,6 +431,11 @@
               <FileName>yfy_data.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Lib\converter\yfy\yfy_data.c</FilePath>
+            </File>
+            <File>
+              <FileName>module_interface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\converter\module_interface.c</FilePath>
             </File>
           </Files>
         </Group>

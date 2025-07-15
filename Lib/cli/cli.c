@@ -91,14 +91,14 @@ static BaseType_t prvTaskStatsCommand(char* pcWriteBuffer, size_t xWriteBufferLe
 {
     (void) pcCommandString;
 
-    TaskStatus_t xTaskArray[6]; // 支持最多6个任务
+    TaskStatus_t xTaskArray[31]; // 支持最多6个任务
     UBaseType_t uxArraySize;
     char* pcPtr = pcWriteBuffer;
     size_t xRemaining = xWriteBufferLen;
     int iLen;
 
     // 获取任务信息
-    uxArraySize = uxTaskGetSystemState(xTaskArray, 6, NULL);
+    uxArraySize = uxTaskGetSystemState(xTaskArray, 31, NULL);
 
     // 输出每个任务
     for (UBaseType_t x = 0; x < uxArraySize && xRemaining > 50; x++)

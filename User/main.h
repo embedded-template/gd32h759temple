@@ -14,11 +14,11 @@ typedef struct task_info_t
 } task_info_t;
 
 #define NAME_cli_task "cli"
-#define STACK_cli_task 200
+#define STACK_cli_task 400
 #define PARAM_cli_task 10
 #define PRIORITY_cli_task 3
 
-#define NAME_power_control_task "power_control"
-#define STACK_power_control_task 200
-#define PARAM_power_control_task 10
-#define PRIORITY_power_control_task 3
+#define NAME_module_interface_init_task "module_interface_init"
+#define STACK_module_interface_init_task 200
+#define PARAM_module_interface_init_task 10
+#define PRIORITY_module_interface_init_task 3

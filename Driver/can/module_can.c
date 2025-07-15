@@ -50,8 +50,8 @@ void module_can_init(void)
     module_can_hw_init();
 
     /* 创建CAN任务 */
-    xTaskCreate(module_tx_task, "module_tx", 100, NULL, 5, NULL);
-    xTaskCreate(module_rx_task, "module_rx", 100, NULL, 5, NULL);
+    xTaskCreate(module_tx_task, "module_tx", 100, NULL, 28, NULL);
+    xTaskCreate(module_rx_task, "module_rx", 100, NULL, 29, NULL);
     #ifdef MODULE_CAN_TEST
     xTaskCreate(module_can_test_task, "can_test", 200, NULL, 3, NULL);
     #endif
@@ -223,7 +223,7 @@ void module_tx_task(void* pvParameters)
         }
 
         /* 任务延时，避免占用过多CPU */
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
 
