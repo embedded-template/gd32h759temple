@@ -84,7 +84,7 @@ static void module_can_hw_init(void)
     can_interrupt_enable(MODULE_CAN_PERIPH, CAN_INT_FIFO_AVAILABLE);
 
     /* 进入正常模式 */
-    can_operation_mode_enter(MODULE_CAN_PERIPH, CAN_LOOPBACK_SILENT_MODE);
+    can_operation_mode_enter(MODULE_CAN_PERIPH, CAN_NORMAL_MODE);
 }
 
 /**
