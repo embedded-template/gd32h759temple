@@ -1,4 +1,5 @@
 #include "module_can.h"
+#include "stdio.h"
 
 
 /** @brief CAN中断接收缓冲区，32字节对齐 */
@@ -19,6 +20,10 @@ static void module_can_fifo_config(void);
 static void module_tx_task(void* pvParameters);
 static void module_rx_task(void* pvParameters);
 
+#ifdef MODULE_CAN_TEST
+#include "log.h"
+static void module_can_test_task(void* pvParameters);
+#endif
 
 /**
  * @brief 获取CAN模块句柄
@@ -47,6 +52,9 @@ void module_can_init(void)
     /* 创建CAN任务 */
     xTaskCreate(module_tx_task, "module_tx", 100, NULL, 5, NULL);
     xTaskCreate(module_rx_task, "module_rx", 100, NULL, 5, NULL);
+    #ifdef MODULE_CAN_TEST
+    xTaskCreate(module_can_test_task, "can_test", 200, NULL, 3, NULL);
+    #endif
 }
 
 
@@ -76,7 +84,7 @@ static void module_can_hw_init(void)
     can_interrupt_enable(MODULE_CAN_PERIPH, CAN_INT_FIFO_AVAILABLE);
 
     /* 进入正常模式 */
-    can_operation_mode_enter(MODULE_CAN_PERIPH, CAN_NORMAL_MODE);
+    can_operation_mode_enter(MODULE_CAN_PERIPH, CAN_LOOPBACK_SILENT_MODE);
 }
 
 /**
@@ -180,7 +188,6 @@ void module_tx_task(void* pvParameters)
 
     while (1)
     {
-        /* 检查是否有数据需要发送 */
         while (!module_can_handle.tx_ring_buffer->is_empty())
         {
             /* 初始化邮箱描述符 */
@@ -213,7 +220,7 @@ void module_tx_task(void* pvParameters)
         }
 
         /* 任务延时，避免占用过多CPU */
-        vTaskDelay(pdMS_TO_TICKS(1));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -226,14 +233,13 @@ void module_rx_task(void* pvParameters)
 {
     can_rx_fifo_struct rx_fifo;
     uint32_t data[3] = {0};
-
     /* 避免编译器警告 */
     (void)pvParameters;
 
     while (1)
     {
         /* 从队列中接收数据，带超时 */
-        if (xQueueReceive(module_can_handle.rx_queue, &rx_fifo, pdMS_TO_TICKS(10)) == pdTRUE)
+        while (xQueueReceive(module_can_handle.rx_queue, &rx_fifo, pdMS_TO_TICKS(10)) == pdTRUE)
         {
             /* 只保留id和data */
             data[0] = rx_fifo.id;
@@ -244,8 +250,7 @@ void module_rx_task(void* pvParameters)
             module_can_handle.rx_ring_buffer->write((uint8_t*)data, sizeof(data), MODULE_CAN_TIMEOUT_MS);
         }
 
-        /* 任务延时，避免占用过多CPU */
-        vTaskDelay(pdMS_TO_TICKS(1));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
@@ -272,3 +277,63 @@ void MODULE_CAN_IRQHandler(void)
     /* 如果有更高优先级任务被唤醒，则进行任务切换 */
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
+
+
+#ifdef MODULE_CAN_TEST
+/**
+ * @brief CAN测试任务
+ * @details 定期发送测试数据并接收数据进行验证
+ * @param pvParameters 任务参数（未使用）
+ */
+static void module_can_test_task(void* pvParameters)
+{
+    uint32_t tx_data[3] = {0};
+    uint32_t rx_data[3] = {0};
+    uint32_t test_counter = 0;
+    uint32_t tx_count = 0;
+    uint32_t rx_count = 0;
+    uint32_t error_count = 0;
+
+    /* 避免编译器警告 */
+    (void)pvParameters;
+
+    /* 等待CAN模块初始化完成 */
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
+    while (1)
+    {
+        /* 准备发送数据 */
+        tx_data[0] = 0x123;  /* CAN ID */
+        tx_data[1] = 0x12345678 ;       /* 数据1 */
+        tx_data[2] = 0x87654321 ;       /* 数据2 */
+
+        /* 发送数据到发送环形缓冲区 */
+        if (module_can_handle.tx_ring_buffer->write((uint8_t*)tx_data, sizeof(tx_data), MODULE_CAN_TIMEOUT_MS) > 0)
+        {
+            tx_count++;
+        }
+
+        /* 尝试接收数据 */
+        while (module_can_handle.rx_ring_buffer->read((uint8_t*)rx_data, sizeof(rx_data), 10) > 0)
+        {
+            rx_count++;
+
+            /* 简单的数据验证（在回环模式下，发送的数据应该能收到） */
+            if ((rx_data[0] != 0x123) ||
+                (rx_data[1] != 0x12345678) ||
+                (rx_data[2] != 0x87654321))
+            {
+                error_count++;
+            }
+        }
+
+        test_counter++;
+
+        Log_debug("CAN Test: TX=%d, RX=%d, ERR=%d\n", tx_count, rx_count, error_count);
+
+        /* 任务延时500ms */
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+}
+
+#endif

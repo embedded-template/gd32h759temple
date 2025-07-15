@@ -8,8 +8,8 @@
 
 #include "utilities/macro.h"
 
-__attribute__((aligned(32))) uint8_t console_rx_buffer[CONSOLE_DMA_BUFFER_RX_SIZE];
-__attribute__((aligned(32))) uint8_t console_buffer[CONSOLE_DMA_BUFFER_TX_SIZE];
+__attribute__((aligned(32))) uint8_t rx_buffer[CONSOLE_DMA_BUFFER_RX_SIZE];
+__attribute__((aligned(32))) uint8_t tx_buffer[CONSOLE_DMA_BUFFER_TX_SIZE];
 
 RING_BUFF_PRE_INIT(console_rx, CONSOLE_RING_BUFFER_RX_SIZE);
 RING_BUFF_PRE_INIT(console_tx, CONSOLE_RING_BUFFER_TX_SIZE);
@@ -79,7 +79,7 @@ void console_tx_dma_config(void)
     dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.request = CONSOLE_DMA_TX_REQUEST;
     dma_init_struct.direction = DMA_MEMORY_TO_PERIPH;
-    dma_init_struct.memory0_addr = (uint32_t) console_buffer;
+    dma_init_struct.memory0_addr = (uint32_t) tx_buffer;
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
     dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
     dma_init_struct.number = console.tx_dma_buffer.size;
@@ -113,10 +113,10 @@ void console_rx_dma_config(void)
     dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.request = CONSOLE_DMA_RX_REQUEST;
     dma_init_struct.direction = DMA_PERIPH_TO_MEMORY;
-    dma_init_struct.memory0_addr = (uint32_t) console_rx_buffer;
+    dma_init_struct.memory0_addr = (uint32_t) rx_buffer;
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
     dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
-    dma_init_struct.number = ARRAYNUM(console_rx_buffer);
+    dma_init_struct.number = ARRAYNUM(rx_buffer);
     dma_init_struct.periph_addr = (uint32_t) CONSOLE_RDATA_ADDRESS;
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.priority = DMA_PRIORITY_ULTRA_HIGH;
@@ -324,8 +324,8 @@ void console_init(void)
 {
     console.rx_ring_buffer = console_rx_ring_buff();
     console.tx_ring_buffer = console_tx_ring_buff();
-    console.rx_dma_buffer.buffer = console_rx_buffer;
-    console.tx_dma_buffer.buffer = console_buffer;
+    console.rx_dma_buffer.buffer = rx_buffer;
+    console.tx_dma_buffer.buffer = tx_buffer;
     console.bReady = true;
     console_uart_init();
     console_tx_dma_config();
