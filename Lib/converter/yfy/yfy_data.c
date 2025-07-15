@@ -16,7 +16,7 @@ module_online_info_t* get_module_online_info(void)
 
 yfy_module_handle_t module_handle = {0};
 
-void yfy_module_handle_init(bool (*send)(uint32_t id, uint8_t* pdata), bool (*recv)(uint8_t id, uint8_t* pdata), uint32_t (*time)(void))
+void yfy_module_handle_init(bool (*send)(uint32_t id, uint8_t* pdata), bool (*recv)(uint32_t id, uint8_t* pdata), uint32_t (*time)(void))
 {
     module_handle.recv = recv;
     module_handle.send = send;

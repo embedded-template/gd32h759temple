@@ -185,11 +185,11 @@ typedef struct module_online_info_t
 typedef struct yfy_module_handle_t
 {
     bool (*send)(uint32_t id, uint8_t* pdata);
-    bool (*recv)(uint8_t id, uint8_t* pdata);
+    bool (*recv)(uint32_t id, uint8_t* pdata);
     uint32_t (*time)(void);
 } yfy_module_handle_t;
 
-void yfy_module_handle_init(bool (*send)(uint32_t id, uint8_t* pdata), bool (*recv)(uint8_t id, uint8_t* pdata), uint32_t (*time)(void));
+void yfy_module_handle_init(bool (*send)(uint32_t id, uint8_t* pdata), bool (*recv)(uint32_t id, uint8_t* pdata), uint32_t (*time)(void));
 
 yfy_module_handle_t* yfy_module_handle_get(void);
 

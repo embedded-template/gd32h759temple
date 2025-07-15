@@ -209,8 +209,11 @@ void module_tx_task(void* pvParameters)
                 can_mailbox_config(MODULE_CAN_PERIPH, MODULE_CAN_TX_MAILBOX, &mdpara);
 
                 /* 等待发送完成 */
-                while (can_flag_get(MODULE_CAN_PERIPH, MODULE_CAN_TX_MAILBOX_FLAG) == RESET)
+                volatile uint32_t count = 0;
+                while (count < 2 && can_flag_get(MODULE_CAN_PERIPH, MODULE_CAN_TX_MAILBOX_FLAG) == RESET)
                 {
+                    /* 等待2ms ,未发送成功将不再发送*/
+                    count++;
                     vTaskDelay(pdMS_TO_TICKS(1));
                 }
 

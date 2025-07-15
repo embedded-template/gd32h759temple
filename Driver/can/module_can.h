@@ -54,3 +54,4 @@ RING_BUFF_EXTERN(module_tx)
 #define MODULE_CAN_PRESCALER 240U
 
 void module_can_init(void);
+can_handle_t* module_can_handle_get(void);

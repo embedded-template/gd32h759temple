@@ -1403,3 +1403,4 @@ bool yfy_module_is_online(uint8_t module_addr)
     }
     return online_info[module_addr].is_online;
 }
+
