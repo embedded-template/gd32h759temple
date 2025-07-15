@@ -14,9 +14,9 @@ __attribute__((aligned(32))) uint8_t tx_buffer[CONSOLE_DMA_BUFFER_TX_SIZE];
 RING_BUFF_PRE_INIT(console_rx, CONSOLE_RING_BUFFER_RX_SIZE);
 RING_BUFF_PRE_INIT(console_tx, CONSOLE_RING_BUFFER_TX_SIZE);
 
-console_t console = {0};
+uart_handle_t console = {0};
 
-console_t* get_console(void)
+uart_handle_t* get_console(void)
 {
     return &console;
 }
@@ -33,19 +33,13 @@ void console_uart_init(void)
     rcu_periph_clock_enable(CONSOLE_USART_GPIO_CLK_RX);
     rcu_periph_clock_enable(CONSOLE_USART_CLK);
 
-    gpio_af_set(CONSOLE_USART_TX_GPIO_PORT, CONSOLE_USART_TX_RX_GPIO_AF,
-                CONSOLE_USART_TX_GPIO_PIN);
-    gpio_mode_set(CONSOLE_USART_TX_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP,
-                  CONSOLE_USART_TX_GPIO_PIN);
-    gpio_output_options_set(CONSOLE_USART_TX_GPIO_PORT, GPIO_OTYPE_PP,
-                            GPIO_OSPEED_100_220MHZ, CONSOLE_USART_TX_GPIO_PIN);
+    gpio_af_set(CONSOLE_USART_TX_GPIO_PORT, CONSOLE_USART_TX_RX_GPIO_AF, CONSOLE_USART_TX_GPIO_PIN);
+    gpio_mode_set(CONSOLE_USART_TX_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, CONSOLE_USART_TX_GPIO_PIN);
+    gpio_output_options_set(CONSOLE_USART_TX_GPIO_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, CONSOLE_USART_TX_GPIO_PIN);
 
-    gpio_af_set(CONSOLE_USART_RX_GPIO_PORT, CONSOLE_USART_TX_RX_GPIO_AF,
-                CONSOLE_USART_RX_GPIO_PIN);
-    gpio_mode_set(CONSOLE_USART_RX_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP,
-                  CONSOLE_USART_RX_GPIO_PIN);
-    gpio_output_options_set(CONSOLE_USART_RX_GPIO_PORT, GPIO_OTYPE_PP,
-                            GPIO_OSPEED_100_220MHZ, CONSOLE_USART_RX_GPIO_PIN);
+    gpio_af_set(CONSOLE_USART_RX_GPIO_PORT, CONSOLE_USART_TX_RX_GPIO_AF, CONSOLE_USART_RX_GPIO_PIN);
+    gpio_mode_set(CONSOLE_USART_RX_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, CONSOLE_USART_RX_GPIO_PIN);
+    gpio_output_options_set(CONSOLE_USART_RX_GPIO_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, CONSOLE_USART_RX_GPIO_PIN);
 
     usart_deinit(CONSOLE_USARTX);
 
@@ -139,21 +133,7 @@ void console_rx_dma_config(void)
     dma_interrupt_enable(DMA0, DMA_CH1, DMA_INT_FTF);
     nvic_irq_enable(DMA0_Channel1_IRQn, 2, 0);
 }
-/**
- * @brief console初始化
- *
- */
-void console_init(void)
-{
-    console.rx_ring_buffer = console_rx_ring_buff();
-    console.tx_ring_buffer = console_tx_ring_buff();
-    console.rx_dma_buffer.buffer = rx_buffer;
-    console.tx_dma_buffer.buffer = tx_buffer;
-    console.bReady = true;
-    console_uart_init();
-    console_tx_dma_config();
-    console_rx_dma_config();
-}
+
 /**
  * @brief console接收任务
  *
@@ -165,8 +145,7 @@ void console_rx_task(void* pvParameters)
         if (console.rx_dma_buffer.size != 0)
         {
             // 接收到数据，读取，并重置DMA
-            int ret = console.rx_ring_buffer->write(
-                console.rx_dma_buffer.buffer, console.rx_dma_buffer.size, 100);
+            int ret = console.rx_ring_buffer->write(console.rx_dma_buffer.buffer, console.rx_dma_buffer.size, 100);
 
             if (ret > 0)
             {
@@ -181,8 +160,7 @@ void console_rx_task(void* pvParameters)
                 printf("console rx ring buffer write timeout\n\r");
             }
             console_rx_dma_config();
-            SCB_InvalidateDCache_by_Addr(
-                (uint32_t*) console.rx_dma_buffer.buffer, ret);
+            SCB_InvalidateDCache_by_Addr((uint32_t*) console.rx_dma_buffer.buffer, ret);
         }
         vTaskDelay(pdMS_TO_TICKS(10));
     }
@@ -199,15 +177,12 @@ void console_tx_task(void* pvParameters)
         {
             if (console.tx_dma_buffer.size == 0)
             {
-                int ret = console.tx_ring_buffer->read(
-                    console.tx_dma_buffer.buffer, CONSOLE_DMA_BUFFER_TX_SIZE,
-                    100);
+                int ret = console.tx_ring_buffer->read(console.tx_dma_buffer.buffer, CONSOLE_DMA_BUFFER_TX_SIZE, 100);
                 if (ret > 0)
                 {
                     console.tx_dma_buffer.size = ret;
                     // 确保 DMA 能看到最新数据
-                    SCB_CleanDCache_by_Addr(
-                        (uint32_t*) console.tx_dma_buffer.buffer, ret);
+                    SCB_CleanDCache_by_Addr((uint32_t*) console.tx_dma_buffer.buffer, ret);
                     console_tx_dma_config();
                 }
             }
@@ -225,8 +200,7 @@ void console_test(void* pvParameters)
     uint8_t data[CONSOLE_RING_BUFFER_RX_SIZE] = {0};
     while (1)
     {
-        int ret = console.rx_ring_buffer->read(
-            data, CONSOLE_RING_BUFFER_RX_SIZE, 100);
+        int ret = console.rx_ring_buffer->read(data, CONSOLE_RING_BUFFER_RX_SIZE, 100);
         if (ret == -1)
         {
             Log_info("console rx ring buffer read timeout");
@@ -312,16 +286,14 @@ void CONSOLE_USART_IRQ_HANDLER(void)
         // 清除接收超时中断标志
         usart_interrupt_flag_clear(CONSOLE_USARTX, USART_INT_FLAG_RT);
 
-        console.rx_dma_buffer.size =
-            CONSOLE_DMA_BUFFER_RX_SIZE - dma_transfer_number_get(DMA0, DMA_CH1);
+        console.rx_dma_buffer.size = CONSOLE_DMA_BUFFER_RX_SIZE - dma_transfer_number_get(DMA0, DMA_CH1);
 
         if (usart_interrupt_flag_get(CONSOLE_USARTX, USART_INT_FLAG_RT) == SET)
         {
             // 清除接收超时中断标志
             usart_interrupt_flag_clear(CONSOLE_USARTX, USART_INT_FLAG_RT);
 
-            console.rx_dma_buffer.size = CONSOLE_DMA_BUFFER_RX_SIZE -
-                                         dma_transfer_number_get(DMA0, DMA_CH1);
+            console.rx_dma_buffer.size = CONSOLE_DMA_BUFFER_RX_SIZE - dma_transfer_number_get(DMA0, DMA_CH1);
 
             // 禁用接收超时，直到下一个数据包开始
             usart_interrupt_disable(CONSOLE_USARTX, USART_INT_RT);
@@ -334,7 +306,7 @@ void CONSOLE_USART_IRQ_HANDLER(void)
  * @brief console任务
  *
  */
-void console_task(void* pvParameters)
+void console_task_init(void)
 {
     xTaskCreate(console_rx_task, "console_rx", 50, NULL, 5, NULL);
     xTaskCreate(console_tx_task, "console_tx", 50, NULL, 5, NULL);
@@ -342,6 +314,21 @@ void console_task(void* pvParameters)
 #ifdef CONSOLE_TEST
     xTaskCreate(console_test, "console_test", 200, NULL, 5, NULL);
 #endif
+}
 
-    vTaskDelete(NULL);
+/**
+ * @brief console初始化
+ *
+ */
+void console_init(void)
+{
+    console.rx_ring_buffer = console_rx_ring_buff();
+    console.tx_ring_buffer = console_tx_ring_buff();
+    console.rx_dma_buffer.buffer = rx_buffer;
+    console.tx_dma_buffer.buffer = tx_buffer;
+    console.bReady = true;
+    console_uart_init();
+    console_tx_dma_config();
+    console_rx_dma_config();
+    console_task_init();
 }

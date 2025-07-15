@@ -11,7 +11,7 @@ LineEnding: LF
 # 指针和引用对齐（C 中主要是指针）
 PointerAlignment: Left
 # 每行最大列数
-ColumnLimit: 80  # C 代码通常使用较短的列宽
+ColumnLimit: 160  # C 代码通常使用较短的列宽
 # 访问修饰符（如 struct 中的 public:）缩进
 AccessModifierOffset: -2
 # 换行规则（Allman 风格，C 中常用）

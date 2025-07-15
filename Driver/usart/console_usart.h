@@ -2,6 +2,7 @@
 
 #include "gd32h7xx.h"
 #include "ring_buffer.h"
+#include "uart.h"
 #include <stdio.h>
 
 #define CONSOLE_USARTX_MODE 0
@@ -33,21 +34,5 @@
 RING_BUFF_EXTERN(console_rx)
 RING_BUFF_EXTERN(console_tx)
 
-typedef struct dma_buffer_t
-{
-    uint8_t* buffer;
-    uint32_t size;
-} dma_buffer_t;
-
-typedef struct console_t
-{
-    bool bReady;
-    ring_buff_t* rx_ring_buffer;
-    ring_buff_t* tx_ring_buffer;
-    dma_buffer_t rx_dma_buffer;
-    dma_buffer_t tx_dma_buffer;
-} console_t;
-
-void console_task(void* pvParameters);
 void console_init(void);
-console_t* get_console(void);
+uart_handle_t* get_console(void);

@@ -63,13 +63,12 @@
 
 /* Metadata information to prepend to every log message. */
 #ifndef LOG_METADATA_FORMAT
-#define LOG_METADATA_FORMAT                                                    \
-    "[%s:%d] " /**< @brief Format of metadata prefix in log messages. */
+#define LOG_METADATA_FORMAT "[%s:%d] " /**< @brief Format of metadata prefix in log messages. */
 #endif
 
 #ifndef LOG_METADATA_ARGS
-#define LOG_METADATA_ARGS                                                      \
-    __FUNCTION__, __LINE__ /**< @brief Arguments into the metadata logging     \
+#define LOG_METADATA_ARGS                                                                                                                                      \
+    __FUNCTION__, __LINE__ /**< @brief Arguments into the metadata logging                                                                                     \
                               prefix format. */
 #endif
 
@@ -96,96 +95,79 @@
 
 #define LIBRARY_LOG_LEVEL LOG_DEBUG
 
-#if !defined(LIBRARY_LOG_LEVEL) ||                                             \
-    ((LIBRARY_LOG_LEVEL != LOG_NONE) && (LIBRARY_LOG_LEVEL != LOG_ERROR) &&    \
-     (LIBRARY_LOG_LEVEL != LOG_WARN) && (LIBRARY_LOG_LEVEL != LOG_INFO) &&     \
-     (LIBRARY_LOG_LEVEL != LOG_DEBUG))
-#error                                                                         \
-    "Please define LIBRARY_LOG_LEVEL as either LOG_NONE, LOG_ERROR, LOG_WARN, LOG_INFO, or LOG_DEBUG."
+#if !defined(LIBRARY_LOG_LEVEL) || ((LIBRARY_LOG_LEVEL != LOG_NONE) && (LIBRARY_LOG_LEVEL != LOG_ERROR) && (LIBRARY_LOG_LEVEL != LOG_WARN) &&                  \
+                                    (LIBRARY_LOG_LEVEL != LOG_INFO) && (LIBRARY_LOG_LEVEL != LOG_DEBUG))
+#error "Please define LIBRARY_LOG_LEVEL as either LOG_NONE, LOG_ERROR, LOG_WARN, LOG_INFO, or LOG_DEBUG."
 #else
 #if LIBRARY_LOG_LEVEL == LOG_DEBUG
 /* All log level messages will logged. */
-#define LogAlways(message)                                                     \
-    SdkLog(("[ALWAYS] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,            \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogAlways(message)                                                                                                                                     \
+    SdkLog(("[ALWAYS] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                       \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
-#define LogError(message)                                                      \
-    SdkLog(("[ERROR] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,             \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogError(message)                                                                                                                                      \
+    SdkLog(("[ERROR] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                        \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
-#define LogWarn(message)                                                       \
-    SdkLog(("[WARN] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,              \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogWarn(message)                                                                                                                                       \
+    SdkLog(("[WARN] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                         \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
-#define LogInfo(message)                                                       \
-    SdkLog(("[INFO] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,              \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogInfo(message)                                                                                                                                       \
+    SdkLog(("[INFO] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                         \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
-#define LogDebug(message)                                                      \
-    SdkLog(("[DEBUG] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,             \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogDebug(message)                                                                                                                                      \
+    SdkLog(("[DEBUG] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                        \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
 
 #elif LIBRARY_LOG_LEVEL == LOG_INFO
 /* Only INFO, WARNING, ERROR, and ALWAYS messages will be logged. */
-#define LogAlways(message)                                                     \
-    SdkLog(("[ALWAYS] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,            \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogAlways(message)                                                                                                                                     \
+    SdkLog(("[ALWAYS] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                       \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
-#define LogError(message)                                                      \
-    SdkLog(("[ERROR] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,             \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogError(message)                                                                                                                                      \
+    SdkLog(("[ERROR] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                        \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
-#define LogWarn(message)                                                       \
-    SdkLog(("[WARN] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,              \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogWarn(message)                                                                                                                                       \
+    SdkLog(("[WARN] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                         \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
-#define LogInfo(message)                                                       \
-    SdkLog(("[INFO] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,              \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogInfo(message)                                                                                                                                       \
+    SdkLog(("[INFO] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                         \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
 #define LogDebug(message)
 
 #elif LIBRARY_LOG_LEVEL == LOG_WARN
 /* Only WARNING, ERROR, and ALWAYS messages will be logged. */
-#define LogAlways(message)                                                     \
-    SdkLog(("[ALWAYS] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,            \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogAlways(message)                                                                                                                                     \
+    SdkLog(("[ALWAYS] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                       \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
-#define LogError(message)                                                      \
-    SdkLog(("[ERROR] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,             \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogError(message)                                                                                                                                      \
+    SdkLog(("[ERROR] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                        \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
-#define LogWarn(message)                                                       \
-    SdkLog(("[WARN] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,              \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogWarn(message)                                                                                                                                       \
+    SdkLog(("[WARN] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                         \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
 #define LogInfo(message)
 #define LogDebug(message)
 
 #elif LIBRARY_LOG_LEVEL == LOG_ERROR
 /* Only ERROR and ALWAYS messages will be logged. */
-#define LogAlways(message)                                                     \
-    SdkLog(("[ALWAYS] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,            \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogAlways(message)                                                                                                                                     \
+    SdkLog(("[ALWAYS] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                       \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
-#define LogError(message)                                                      \
-    SdkLog(("[ERROR] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME,             \
-            LOG_METADATA_ARGS));                                               \
-    SdkLog(message);                                                           \
+#define LogError(message)                                                                                                                                      \
+    SdkLog(("[ERROR] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                        \
+    SdkLog(message);                                                                                                                                           \
     SdkLog(("\r\n"))
 #define LogWarn(message)
 #define LogInfo(message)
@@ -200,9 +182,9 @@
 #define LogDebug(message)
 
 #endif /* if LIBRARY_LOG_LEVEL == LOG_NONE */
-#endif /* if !defined( LIBRARY_LOG_LEVEL ) || ( ( LIBRARY_LOG_LEVEL !=         \
-          LOG_NONE ) && ( LIBRARY_LOG_LEVEL != LOG_ERROR ) && (                \
-          LIBRARY_LOG_LEVEL != LOG_WARN ) && ( LIBRARY_LOG_LEVEL != LOG_INFO ) \
+#endif /* if !defined( LIBRARY_LOG_LEVEL ) || ( ( LIBRARY_LOG_LEVEL !=                                                                                         \
+          LOG_NONE ) && ( LIBRARY_LOG_LEVEL != LOG_ERROR ) && (                                                                                                \
+          LIBRARY_LOG_LEVEL != LOG_WARN ) && ( LIBRARY_LOG_LEVEL != LOG_INFO )                                                                                 \
           && ( LIBRARY_LOG_LEVEL != LOG_DEBUG ) ) */
 
 #endif /* ifndef LOGGING_STACK_H */

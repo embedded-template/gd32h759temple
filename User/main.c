@@ -2,16 +2,16 @@
 #include "cli.h"
 #include "gd32h7xx.h"
 #include "log.h"
+#include "power_interface.h"
 #include "usart/console_usart.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include "can/module_can.h"
 
-task_info_t task_info_all[] = {{console_task, NAME_console_task,
-                                STACK_console_task, PARAM_console_task,
-                                PRIORITY_console_task, NULL},
-                               {CLI_Task, NAME_cli_task, STACK_cli_task,
-                                PARAM_cli_task, PRIORITY_cli_task, NULL}};
+task_info_t task_info_all[] = {
+    {CLI_Task, NAME_cli_task, STACK_cli_task, PARAM_cli_task, PRIORITY_cli_task, NULL},
+    {power_control_task, NAME_power_control_task, STACK_power_control_task, PARAM_power_control_task, PRIORITY_power_control_task, NULL}};
 
 #define TASK_NUM (sizeof(task_info_all) / sizeof(task_info_t))
 
@@ -24,6 +24,14 @@ void vTask1(void* pvParameters)
     }
 }
 
+void cache_enable(void)
+{
+    /* enable I-Cache */
+    SCB_EnableICache();
+    /* enable D-Cache */
+    SCB_EnableDCache();
+}
+
 int main(void)
 {
     uint8_t ucaRxBuf[256];
@@ -31,13 +39,14 @@ int main(void)
 
     nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
 
+    cache_enable();
+
     console_init();
+    module_can_init();
 
     for (int i = 0; i < TASK_NUM; i++)
     {
-        xTaskCreate(task_info_all[i].pxTaskCode, task_info_all[i].pcName,
-                    task_info_all[i].uxStackDepth, &task_info_all[i].time,
-                    task_info_all[i].uxPriority,
+        xTaskCreate(task_info_all[i].pxTaskCode, task_info_all[i].pcName, task_info_all[i].uxStackDepth, &task_info_all[i].time, task_info_all[i].uxPriority,
                     task_info_all[i].pxCreatedTask);
     }
     Log_info("系统初始化完成");
@@ -62,10 +71,8 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
     /* 记录出错任务的名称 */
     if (pcTaskName != NULL)
     {
-        strncpy((char*) g_overflow_task_name, pcTaskName,
-                configMAX_TASK_NAME_LEN - 1);
-        g_overflow_task_name[configMAX_TASK_NAME_LEN - 1] =
-            '\0'; /* 确保字符串结束 */
+        strncpy((char*) g_overflow_task_name, pcTaskName, configMAX_TASK_NAME_LEN - 1);
+        g_overflow_task_name[configMAX_TASK_NAME_LEN - 1] = '\0'; /* 确保字符串结束 */
     }
     else
     {
@@ -76,10 +83,9 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
     g_stack_overflow_count++;
 
     /* 输出错误信息 */
-    console_t* console = get_console();
+    uart_handle_t* console = get_console();
     console->bReady = false;
-    printf("任务:%s stack 溢出, task handle: 0x%08lX, Count: %d\r\n",
-           (char*) g_overflow_task_name, (unsigned long) g_overflow_task_handle,
+    printf("任务:%s stack 溢出, task handle: 0x%08lX, Count: %d\r\n", (char*) g_overflow_task_name, (unsigned long) g_overflow_task_handle,
            g_stack_overflow_count);
 
     /* 进入死循环，防止系统继续运行 */

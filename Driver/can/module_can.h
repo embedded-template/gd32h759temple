@@ -1,0 +1,56 @@
+#pragma once
+
+#include "FreeRTOS.h"
+#include "can.h"
+#include "task.h"
+#include "queue.h"
+#include "gd32h7xx_can.h"
+#include <stdint.h>
+#include <stdbool.h>
+
+#define MODULE_RING_BUFFER_RX_SIZE 16 * 10 // 10条数据的缓存
+#define MODULE_RING_BUFFER_TX_SIZE 16 * 10 // 10条数据的缓存
+
+RING_BUFF_EXTERN(module_rx)
+RING_BUFF_EXTERN(module_tx)
+
+/* CAN硬件配置宏定义 */
+#define MODULE_CAN_PERIPH CAN0
+#define MODULE_CAN_IDX IDX_CAN0
+#define MODULE_CAN_CLOCK_SOURCE RCU_CANSRC_APB2 /*(600MHz / 2)*/
+#define MODULE_CAN_RCU RCU_CAN0
+#define MODULE_CAN_IRQn CAN0_Message_IRQn
+#define MODULE_CAN_IRQHandler CAN0_Message_IRQHandler
+
+/* CAN GPIO配置宏定义 */
+#define MODULE_CAN_GPIO_PORT GPIOD
+#define MODULE_CAN_GPIO_RCU RCU_GPIOD
+#define MODULE_CAN_RX_PIN GPIO_PIN_0
+#define MODULE_CAN_TX_PIN GPIO_PIN_1
+#define MODULE_CAN_GPIO_AF GPIO_AF_9
+
+/* CAN邮箱配置宏定义 */
+#define MODULE_CAN_TX_MAILBOX 8
+#define MODULE_CAN_TX_MAILBOX_FLAG CAN_FLAG_MB8
+
+/* CAN中断配置宏定义 */
+#define MODULE_CAN_IRQ_PRIORITY 2U
+#define MODULE_CAN_IRQ_SUB_PRIORITY 0U
+
+/* CAN FIFO配置宏定义 */
+#define MODULE_CAN_FIFO_ADDRESS ((uint32_t) CAN_RAM(MODULE_CAN_PERIPH))
+#define MODULE_CAN_DMA_RX_REQUEST DMA_REQUEST_CAN0
+
+/* CAN数据配置宏定义 */
+#define MODULE_CAN_DATA_BYTES 8U
+#define MODULE_CAN_TIMEOUT_MS 100
+
+/* CAN波特率配置宏定义 波特率 = 时钟 / (MODULE_CAN_PRESCALER *(MODULE_CAN_RESYNC_JUMP_WIDTH + MODULE_CAN_PROP_TIME_SEGMENT + MODULE_CAN_TIME_SEGMENT_1 +
+ * MODULE_CAN_TIME_SEGMENT_2))*/
+#define MODULE_CAN_RESYNC_JUMP_WIDTH 1U
+#define MODULE_CAN_PROP_TIME_SEGMENT 2U
+#define MODULE_CAN_TIME_SEGMENT_1 5U
+#define MODULE_CAN_TIME_SEGMENT_2 2U
+#define MODULE_CAN_PRESCALER 240U
+
+void module_can_init(void);
