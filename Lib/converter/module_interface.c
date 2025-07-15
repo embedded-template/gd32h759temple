@@ -248,7 +248,7 @@ void module_interface_init_task(void* pvParameters)
         if(!found)
         {
             //没有找到匹配的接口，等待下次重试
-            Log_debug("没有找到电源接口，5s后重试\n");
+            Log_error("没有找到电源接口，5s后重试\n");
             vTaskDelay(pdMS_TO_TICKS(5000));
             continue;
         }
