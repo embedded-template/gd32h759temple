@@ -106,3 +106,5 @@ void yfy_send_write_addr_model_by_group(uint8_t group_num, uint8_t model);
 void yfy_send_write_single_addr_model(uint8_t module_addr, uint8_t model);
 
 bool yfy_module_is_online(uint8_t module_addr);
+void yfy_module_check(void);
+bool yfy_module_ok(void);

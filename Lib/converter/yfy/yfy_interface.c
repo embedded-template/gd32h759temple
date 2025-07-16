@@ -1404,3 +1404,21 @@ bool yfy_module_is_online(uint8_t module_addr)
     return online_info[module_addr].is_online;
 }
 
+void yfy_module_check(void)
+{
+    yfy_send_read_sys_module_num();
+}
+
+bool yfy_module_ok(void)
+{
+    uint8_t num = 0;
+    yfy_get_sys_module_num(&num);
+    if(num > 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
