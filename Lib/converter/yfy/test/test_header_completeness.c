@@ -6,9 +6,9 @@
  *
  * 本测试验证yfy_interface.h中声明的所有函数都有对应的实现
  */
-extern module_data_t* get_module_data(void);
-extern group_module_data_t* get_group_module_data(void);
-extern sys_module_data_t* get_sys_module_data(void);
+extern yfy_module_data_t* get_module_data(void);
+extern yfy_group_module_data_t* get_group_module_data(void);
+extern yfy_sys_module_data_t* get_sys_module_data(void);
 
 int main()
 {
@@ -18,9 +18,9 @@ int main()
     printf("测试方法：编译链接测试，如果成功则说明所有函数声明都正确\n\n");
 
     // 测试数据获取函数指针
-    module_data_t* (*get_module_ptr)(void) = get_module_data;
-    group_module_data_t* (*get_group_ptr)(void) = get_group_module_data;
-    sys_module_data_t* (*get_sys_ptr)(void) = get_sys_module_data;
+    yfy_module_data_t* (*get_module_ptr)(void) = get_module_data;
+    yfy_group_module_data_t* (*get_group_ptr)(void) = get_group_module_data;
+    yfy_sys_module_data_t* (*get_sys_ptr)(void) = get_sys_module_data;
 
     // 测试读取函数指针
     bool (*get_voltage_ptr)(uint8_t, float*) = yfy_get_module_voltage;

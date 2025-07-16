@@ -20,7 +20,7 @@ void test_time_overflow_handling()
     yfy_module_handle_init(NULL, NULL, mock_time_func);
 
     // 获取在线信息数组（需要外部访问）
-    extern module_online_info_t stModuleOnlineInfo[MODULE_NUM];
+    extern yfy_module_online_info_t stModuleOnlineInfo[MODULE_NUM];
 
     printf("\n测试1：正常时间递增情况\n");
     // 设置模块0在线，时间为1000

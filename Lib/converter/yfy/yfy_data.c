@@ -4,12 +4,12 @@
 #include <stdint.h>
 
 static bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata);
-static bool yfy_data_unpack(module_info_type_t type, uint8_t cmd, uint8_t module_addr, uint8_t* p_data);
+static bool yfy_data_unpack(yfy_module_info_type_t type, uint8_t cmd, uint8_t module_addr, uint8_t* p_data);
 static void yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_start, uint8_t bit_endd, uint8_t addr, uint8_t* pdata, void* pstore_data);
 
-module_online_info_t stModuleOnlineInfo[MODULE_NUM] = {0};
+yfy_module_online_info_t stModuleOnlineInfo[MODULE_NUM] = {0};
 
-module_online_info_t* get_module_online_info(void)
+yfy_module_online_info_t* get_module_online_info(void)
 {
     return stModuleOnlineInfo;
 }
@@ -32,28 +32,28 @@ yfy_module_handle_t* yfy_module_handle_get(void)
  * @defgroup 英飞源模块接收数据定义
  * @{
  */
-module_data_t stModuleData = {0};
+yfy_module_data_t stModuleData = {0};
 
-module_data_t* get_module_data(void)
+yfy_module_data_t* get_module_data(void)
 {
     return &stModuleData;
 }
 
-group_module_data_t stGroupModuleData = {0};
+yfy_group_module_data_t stGroupModuleData = {0};
 
-group_module_data_t* get_group_module_data(void)
+yfy_group_module_data_t* get_group_module_data(void)
 {
     return &stGroupModuleData;
 }
 
-sys_module_data_t stSysModuleData = {0};
+yfy_sys_module_data_t stSysModuleData = {0};
 
-sys_module_data_t* get_sys_module_data(void)
+yfy_sys_module_data_t* get_sys_module_data(void)
 {
     return &stSysModuleData;
 }
 
-module_info_t stModuleInfo[] = {
+yfy_module_info_t stModuleInfo[] = {
     {.cmd = 0x03, .byte_start = 0, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.voltage[0]},
     {.cmd = 0x03, .byte_start = 4, .byte_end = 8, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.current[0]},
     {.cmd = 0x04, .byte_start = 2, .byte_end = 3, .bit_start = 0, .bit_end = 0, .pdata = &stModuleData.group[0]},
@@ -102,16 +102,16 @@ module_info_t stModuleInfo[] = {
 
 };
 
-group_module_info_t stGroupModuleInfo[] = {
+yfy_group_module_info_t stGroupModuleInfo[] = {
     {.cmd = 0x01, .byte_start = 0, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stGroupModuleData.voltage[0]},
     {.cmd = 0x01, .byte_start = 4, .byte_end = 8, .bit_start = 0, .bit_end = 0, .pdata = &stGroupModuleData.current[0]},
     {.cmd = 0x02, .byte_start = 2, .byte_end = 3, .bit_start = 0, .bit_end = 0, .pdata = &stGroupModuleData.module_num[0]}};
 
-sys_module_inf_t stSysModuleInf[] = {{.cmd = 0x01, .byte_start = 0, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.voltage},
+yfy_sys_module_inf_t stSysModuleInf[] = {{.cmd = 0x01, .byte_start = 0, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.voltage},
                                      {.cmd = 0x01, .byte_start = 4, .byte_end = 8, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.current},
                                      {.cmd = 0x02, .byte_start = 2, .byte_end = 3, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.module_num}};
 
-set_moduole_inf_t stSetModuleInf[] = {
+yfy_set_moduole_inf_t stSetModuleInf[] = {
     {.cmd = 0x13, .byte_start = 0, .byte_end = 1}, {.cmd = 0x14, .byte_start = 0, .byte_end = 1}, {.cmd = 0x16, .byte_start = 0, .byte_end = 1},
     {.cmd = 0x19, .byte_start = 0, .byte_end = 1}, {.cmd = 0x1A, .byte_start = 0, .byte_end = 1}, {.cmd = 0x1B, .byte_start = 0, .byte_end = 1},
     {.cmd = 0x1C, .byte_start = 0, .byte_end = 4}, {.cmd = 0x1C, .byte_start = 4, .byte_end = 8}, {.cmd = 0x1F, .byte_start = 0, .byte_end = 1}};
@@ -188,7 +188,7 @@ bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* p
         }
         // 记录模块通讯时间
         yfy_module_handle_t* handle = yfy_module_handle_get();
-        module_online_info_t* online_info = get_module_online_info();
+        yfy_module_online_info_t* online_info = get_module_online_info();
         online_info[module_addr].module_addr = module_addr;
         online_info[module_addr].last_online_time = handle->time();
         online_info[module_addr].is_online = true;
@@ -200,7 +200,7 @@ bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* p
 /**
  * @brief 将数据发送到
  */
-static bool yfy_data_unpack(module_info_type_t type, uint8_t cmd, uint8_t module_addr, uint8_t* pdata)
+static bool yfy_data_unpack(yfy_module_info_type_t type, uint8_t cmd, uint8_t module_addr, uint8_t* pdata)
 {
     uint8_t start_parse = 1;
     uint8_t on_parse = 2;
@@ -382,7 +382,7 @@ void module_online_check(void)
     {
         last_check_time = current_time;
 
-        module_online_info_t* online_info = get_module_online_info();
+        yfy_module_online_info_t* online_info = get_module_online_info();
         for (uint8_t i = 0; i < MODULE_NUM; i++)
         {
             if (online_info[i].is_online)

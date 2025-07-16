@@ -65,7 +65,7 @@
  */
 #define YFY_EXTRACT_SRC_ADDR(data) ((data) & 0xFF)
 
-typedef struct module_data_t
+typedef struct yfy_module_data_t
 {
     float voltage[MODULE_NUM]; // 模块电压
     float current[MODULE_NUM]; // 模块电流
@@ -113,23 +113,23 @@ typedef struct module_data_t
 
     // 设置命令回复中的部分数据与读取重合，不进行处理。无用数据不处理。
     uint8_t addr_modeL[MODULE_NUM]; // 模块地址模式
-} module_data_t;
+} yfy_module_data_t;
 
-typedef struct group_module_data_t
+typedef struct yfy_group_module_data_t
 {
     float voltage[GROUP_MODULE_NUM];      // 组电压
     float current[GROUP_MODULE_NUM];      // 组电流
     uint8_t module_num[GROUP_MODULE_NUM]; // 组内模块数量
-} group_module_data_t;
+} yfy_group_module_data_t;
 
-typedef struct sys_module_data_t
+typedef struct yfy_sys_module_data_t
 {
     float voltage;      // 系统电压
     float current;      // 系统电流
     uint8_t module_num; // 系统模块数量
-} sys_module_data_t;
+} yfy_sys_module_data_t;
 
-typedef struct module_info_t
+typedef struct yfy_module_info_t
 {
     uint16_t cmd;
     uint16_t byte_start;
@@ -137,9 +137,9 @@ typedef struct module_info_t
     uint16_t bit_start;
     uint16_t bit_end;
     void* pdata;
-} module_info_t;
+} yfy_module_info_t;
 
-typedef struct group_module_info_t
+typedef struct yfy_group_module_info_t
 {
     uint16_t cmd;
     uint16_t byte_start;
@@ -147,9 +147,9 @@ typedef struct group_module_info_t
     uint16_t bit_start;
     uint16_t bit_end;
     void* pdata;
-} group_module_info_t;
+} yfy_group_module_info_t;
 
-typedef struct sys_module_inf_t
+typedef struct yfy_sys_module_inf_t
 {
     uint16_t cmd;
     uint16_t byte_start;
@@ -157,30 +157,30 @@ typedef struct sys_module_inf_t
     uint16_t bit_start;
     uint16_t bit_end;
     void* pdata;
-} sys_module_inf_t;
+} yfy_sys_module_inf_t;
 
 #define MODULE_OFFLINE_TIME 5000
 
-typedef struct set_moduole_inf_t
+typedef struct yfy_set_moduole_inf_t
 {
     uint16_t cmd;
     uint16_t byte_start;
     uint16_t byte_end;
-} set_moduole_inf_t;
+} yfy_set_moduole_inf_t;
 
-typedef enum module_info_type_t
+typedef enum yfy_module_info_type_t
 {
     eModuleInfo,
     eGroupModuleInfo,
     eSysModuleInfo,
-} module_info_type_t;
+} yfy_module_info_type_t;
 
-typedef struct module_online_info_t
+typedef struct yfy_module_online_info_t
 {
     uint8_t module_addr;
     uint32_t last_online_time;
     bool is_online;
-} module_online_info_t;
+} yfy_module_online_info_t;
 
 typedef struct yfy_module_handle_t
 {
@@ -197,4 +197,4 @@ void yfy_process_data(void);
 
 void module_online_check(void);
 
-module_online_info_t* get_module_online_info(void);
+yfy_module_online_info_t* get_module_online_info(void);

@@ -31,8 +31,8 @@ void test_interval_check()
     yfy_module_handle_init(mock_send_func, mock_recv_func, mock_time_func);
 
     // 获取在线信息数组（需要声明外部变量）
-    extern module_online_info_t stModuleOnlineInfo[MODULE_NUM];
-    module_online_info_t* online_info = stModuleOnlineInfo;
+    extern yfy_module_online_info_t stModuleOnlineInfo[MODULE_NUM];
+    yfy_module_online_info_t* online_info = stModuleOnlineInfo;
 
     printf("\n测试1：验证1000ms间隔控制\n");
 

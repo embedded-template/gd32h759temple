@@ -1,9 +1,9 @@
 #include "yfy_interface.h"
 #include <string.h>
 
-extern module_data_t* get_module_data(void);
-extern group_module_data_t* get_group_module_data(void);
-extern sys_module_data_t* get_sys_module_data(void);
+extern yfy_module_data_t* get_module_data(void);
+extern yfy_group_module_data_t* get_group_module_data(void);
+extern yfy_sys_module_data_t* get_sys_module_data(void);
 extern void yfy_send_read_cmd(uint8_t dev_id, uint8_t cmd, uint8_t module_addr);
 extern void yfy_send_write_cmd(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata);
 
@@ -40,7 +40,7 @@ bool yfy_get_module_voltage(uint8_t module_addr, float* voltage)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *voltage = module_data->voltage[module_addr];
     return true;
 }
@@ -63,7 +63,7 @@ bool yfy_get_module_current(uint8_t module_addr, float* current)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *current = module_data->current[module_addr];
     return true;
 }
@@ -86,7 +86,7 @@ bool yfy_get_module_group(uint8_t module_addr, uint8_t* group)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *group = module_data->group[module_addr];
     return true;
 }
@@ -109,7 +109,7 @@ bool yfy_get_module_temp(uint8_t module_addr, int8_t* temp)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *temp = module_data->temp[module_addr];
     return true;
 }
@@ -133,7 +133,7 @@ bool yfy_get_module_limit_power(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->module_limit_power[module_addr];
     return true;
 }
@@ -156,7 +156,7 @@ bool yfy_get_module_id_duplicate(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->module_id_duplicate[module_addr];
     return true;
 }
@@ -179,7 +179,7 @@ bool yfy_get_module_severe_unbalanced(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->module_severe_unbalanced[module_addr];
     return true;
 }
@@ -202,7 +202,7 @@ bool yfy_get_three_phase_input_missing(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->three_phase_input_missing[module_addr];
     return true;
 }
@@ -225,7 +225,7 @@ bool yfy_get_three_phase_input_unbalanced(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->three_phase_input_unbalanced[module_addr];
     return true;
 }
@@ -248,7 +248,7 @@ bool yfy_get_input_undervoltage(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->input_undervoltage[module_addr];
     return true;
 }
@@ -271,7 +271,7 @@ bool yfy_get_input_overvoltage(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->input_overvoltage[module_addr];
     return true;
 }
@@ -294,7 +294,7 @@ bool yfy_get_module_pfc_fault(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->module_pfc_fault[module_addr];
     return true;
 }
@@ -318,7 +318,7 @@ bool yfy_get_module_dc_side_fault(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->module_dc_side_fault[module_addr];
     return true;
 }
@@ -341,7 +341,7 @@ bool yfy_get_module_fault(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->module_fault[module_addr];
     return true;
 }
@@ -364,7 +364,7 @@ bool yfy_get_module_protection(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->module_protection[module_addr];
     return true;
 }
@@ -387,7 +387,7 @@ bool yfy_get_fan_fault(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->fan_fault[module_addr];
     return true;
 }
@@ -410,7 +410,7 @@ bool yfy_get_over_temp(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->over_temp[module_addr];
     return true;
 }
@@ -433,7 +433,7 @@ bool yfy_get_output_overvoltage(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->output_overvoltage[module_addr];
     return true;
 }
@@ -456,7 +456,7 @@ bool yfy_get_walk_in_enable(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->walk_in_enable[module_addr];
     return true;
 }
@@ -479,7 +479,7 @@ bool yfy_get_module_comm_interrupt(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->module_comm_interrupt[module_addr];
     return true;
 }
@@ -503,7 +503,7 @@ bool yfy_get_output_short_circuit(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->output_short_circuit[module_addr];
     return true;
 }
@@ -526,7 +526,7 @@ bool yfy_get_module_internal_comm_fault(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->module_internal_comm_fault[module_addr];
     return true;
 }
@@ -549,7 +549,7 @@ bool yfy_get_input_or_bus_abnormal(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->input_or_bus_abnormal[module_addr];
     return true;
 }
@@ -572,7 +572,7 @@ bool yfy_get_module_sleep(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->module_sleep[module_addr];
     return true;
 }
@@ -595,7 +595,7 @@ bool yfy_get_module_discharge_abnormal(uint8_t module_addr, uint8_t* status)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *status = module_data->module_discharge_abnormal[module_addr];
     return true;
 }
@@ -619,7 +619,7 @@ bool yfy_get_ac_input_voltage_ab(uint8_t module_addr, uint16_t* voltage)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *voltage = module_data->ac_input_voltage_ab[module_addr];
     return true;
 }
@@ -642,7 +642,7 @@ bool yfy_get_ac_input_voltage_bc(uint8_t module_addr, uint16_t* voltage)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *voltage = module_data->ac_input_voltage_bc[module_addr];
     return true;
 }
@@ -665,7 +665,7 @@ bool yfy_get_ac_input_voltage_ca(uint8_t module_addr, uint16_t* voltage)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *voltage = module_data->ac_input_voltage_ca[module_addr];
     return true;
 }
@@ -689,7 +689,7 @@ bool yfy_get_max_voltage(uint8_t module_addr, uint16_t* voltage)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *voltage = module_data->max_voltage[module_addr];
     return true;
 }
@@ -712,7 +712,7 @@ bool yfy_get_min_voltage(uint8_t module_addr, uint16_t* voltage)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *voltage = module_data->min_voltage[module_addr];
     return true;
 }
@@ -735,7 +735,7 @@ bool yfy_get_max_current(uint8_t module_addr, uint16_t* current)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *current = module_data->max_current[module_addr];
     return true;
 }
@@ -758,7 +758,7 @@ bool yfy_get_max_power(uint8_t module_addr, uint16_t* power)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *power = module_data->max_power[module_addr];
     return true;
 }
@@ -782,7 +782,7 @@ bool yfy_get_external_voltage(uint8_t module_addr, uint16_t* voltage)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *voltage = module_data->external_voltage[module_addr];
     return true;
 }
@@ -805,7 +805,7 @@ bool yfy_get_max_output_current(uint8_t module_addr, uint16_t* current)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *current = module_data->max_output_current[module_addr];
     return true;
 }
@@ -829,7 +829,7 @@ bool yfy_get_group_voltage(uint8_t group_num, float* voltage)
         return false;
     }
 
-    group_module_data_t* group_data = get_group_module_data();
+    yfy_group_module_data_t* group_data = get_group_module_data();
     // 组号从1开始，所以访问数组时需要减1
     *voltage = group_data->voltage[group_num - 1];
     return true;
@@ -853,7 +853,7 @@ bool yfy_get_group_current(uint8_t group_num, float* current)
         return false;
     }
 
-    group_module_data_t* group_data = get_group_module_data();
+    yfy_group_module_data_t* group_data = get_group_module_data();
     // 组号从1开始，所以访问数组时需要减1
     *current = group_data->current[group_num - 1];
     return true;
@@ -877,7 +877,7 @@ bool yfy_get_group_module_num(uint8_t group_num, uint8_t* module_num)
         return false;
     }
 
-    group_module_data_t* group_data = get_group_module_data();
+    yfy_group_module_data_t* group_data = get_group_module_data();
     // 组号从1开始，所以访问数组时需要减1
     *module_num = group_data->module_num[group_num - 1];
     return true;
@@ -901,7 +901,7 @@ bool yfy_get_module_addr_mode(uint8_t module_addr, uint8_t* addr_mode)
         return false;
     }
 
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     *addr_mode = module_data->addr_modeL[module_addr];
     return true;
 }
@@ -920,7 +920,7 @@ bool yfy_get_sys_voltage(float* voltage)
         return false;
     }
 
-    sys_module_data_t* sys_data = get_sys_module_data();
+    yfy_sys_module_data_t* sys_data = get_sys_module_data();
     *voltage = sys_data->voltage;
     return true;
 }
@@ -938,7 +938,7 @@ bool yfy_get_sys_current(float* current)
         return false;
     }
 
-    sys_module_data_t* sys_data = get_sys_module_data();
+    yfy_sys_module_data_t* sys_data = get_sys_module_data();
     *current = sys_data->current;
     return true;
 }
@@ -956,7 +956,7 @@ bool yfy_get_sys_module_num(uint8_t* module_num)
         return false;
     }
 
-    sys_module_data_t* sys_data = get_sys_module_data();
+    yfy_sys_module_data_t* sys_data = get_sys_module_data();
     *module_num = sys_data->module_num;
     return true;
 }
@@ -1396,7 +1396,7 @@ void yfy_send_write_single_addr_model(uint8_t module_addr, uint8_t model)
  */
 bool yfy_module_is_online(uint8_t module_addr)
 {
-    module_online_info_t* online_info = get_module_online_info();
+    yfy_module_online_info_t* online_info = get_module_online_info();
     if (module_addr >= MODULE_NUM)
     {
         return false;

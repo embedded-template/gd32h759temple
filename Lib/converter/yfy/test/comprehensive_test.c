@@ -6,9 +6,9 @@
 #include <time.h>
 
 // 外部函数声明
-extern module_data_t* get_module_data(void);
-extern group_module_data_t* get_group_module_data(void);
-extern sys_module_data_t* get_sys_module_data(void);
+extern yfy_module_data_t* get_module_data(void);
+extern yfy_group_module_data_t* get_group_module_data(void);
+extern yfy_sys_module_data_t* get_sys_module_data(void);
 
 // 测试统计
 typedef struct
@@ -58,9 +58,9 @@ static clock_t start_time;
 // 随机数据生成
 void generate_random_data()
 {
-    module_data_t* module_data = get_module_data();
-    group_module_data_t* group_data = get_group_module_data();
-    sys_module_data_t* sys_data = get_sys_module_data();
+    yfy_module_data_t* module_data = get_module_data();
+    yfy_group_module_data_t* group_data = get_group_module_data();
+    yfy_sys_module_data_t* sys_data = get_sys_module_data();
 
     srand((unsigned int) time(NULL));
 
@@ -180,7 +180,7 @@ void consistency_test()
     printf("\n=== 数据一致性测试 ===\n");
 
     // 设置已知数据
-    module_data_t* module_data = get_module_data();
+    yfy_module_data_t* module_data = get_module_data();
     module_data->voltage[0] = 48.5f;
     module_data->current[0] = 12.3f;
     module_data->group[0] = 5;

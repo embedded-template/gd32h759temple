@@ -4,9 +4,9 @@
 #include <string.h>
 
 // 外部函数声明
-extern module_data_t* get_module_data(void);
-extern group_module_data_t* get_group_module_data(void);
-extern sys_module_data_t* get_sys_module_data(void);
+extern yfy_module_data_t* get_module_data(void);
+extern yfy_group_module_data_t* get_group_module_data(void);
+extern yfy_sys_module_data_t* get_sys_module_data(void);
 
 // 测试统计
 static int test_count = 0;
@@ -31,21 +31,21 @@ static int pass_count = 0;
 // 清空测试数据
 void clear_all_data()
 {
-    module_data_t* module_data = get_module_data();
-    group_module_data_t* group_data = get_group_module_data();
-    sys_module_data_t* sys_data = get_sys_module_data();
+    yfy_module_data_t* module_data = get_module_data();
+    yfy_group_module_data_t* group_data = get_group_module_data();
+    yfy_sys_module_data_t* sys_data = get_sys_module_data();
 
-    memset(module_data, 0, sizeof(module_data_t));
-    memset(group_data, 0, sizeof(group_module_data_t));
-    memset(sys_data, 0, sizeof(sys_module_data_t));
+    memset(module_data, 0, sizeof(yfy_module_data_t));
+    memset(group_data, 0, sizeof(yfy_group_module_data_t));
+    memset(sys_data, 0, sizeof(yfy_sys_module_data_t));
 }
 
 // 设置测试数据
 void setup_test_data()
 {
-    module_data_t* module_data = get_module_data();
-    group_module_data_t* group_data = get_group_module_data();
-    sys_module_data_t* sys_data = get_sys_module_data();
+    yfy_module_data_t* module_data = get_module_data();
+    yfy_group_module_data_t* group_data = get_group_module_data();
+    yfy_sys_module_data_t* sys_data = get_sys_module_data();
 
     // 设置模块数据
     for (int i = 0; i < 3; i++)

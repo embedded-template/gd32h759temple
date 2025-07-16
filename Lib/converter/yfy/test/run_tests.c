@@ -3,9 +3,9 @@
 #include <string.h>
 
 // 外部函数声明
-extern module_data_t* get_module_data(void);
-extern group_module_data_t* get_group_module_data(void);
-extern sys_module_data_t* get_sys_module_data(void);
+extern yfy_module_data_t* get_module_data(void);
+extern yfy_group_module_data_t* get_group_module_data(void);
+extern yfy_sys_module_data_t* get_sys_module_data(void);
 
 // 简洁的测试宏
 #define RUN_TEST(test_func)                                                                                                                                    \
@@ -30,14 +30,14 @@ static int total = 0, passed = 0, failed = 0;
 // 初始化测试数据
 void init_test_data()
 {
-    module_data_t* module_data = get_module_data();
-    group_module_data_t* group_data = get_group_module_data();
-    sys_module_data_t* sys_data = get_sys_module_data();
+    yfy_module_data_t* module_data = get_module_data();
+    yfy_group_module_data_t* group_data = get_group_module_data();
+    yfy_sys_module_data_t* sys_data = get_sys_module_data();
 
     // 清零
-    memset(module_data, 0, sizeof(module_data_t));
-    memset(group_data, 0, sizeof(group_module_data_t));
-    memset(sys_data, 0, sizeof(sys_module_data_t));
+    memset(module_data, 0, sizeof(yfy_module_data_t));
+    memset(group_data, 0, sizeof(yfy_group_module_data_t));
+    memset(sys_data, 0, sizeof(yfy_sys_module_data_t));
 
     // 设置标准测试数据
     module_data->voltage[0] = 48.0f;

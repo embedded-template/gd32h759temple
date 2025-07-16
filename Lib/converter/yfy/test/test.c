@@ -5,9 +5,9 @@
 #include <string.h>
 
 // 外部声明全局数据结构
-extern module_data_t stModuleData;
-extern group_module_data_t stGroupModuleData;
-extern sys_module_data_t stSysModuleData;
+extern yfy_module_data_t stModuleData;
+extern yfy_group_module_data_t stGroupModuleData;
+extern yfy_sys_module_data_t stSysModuleData;
 
 // 测试辅助函数
 void print_test_result(const char* test_name, bool result)
