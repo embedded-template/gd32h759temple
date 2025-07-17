@@ -6,6 +6,7 @@
 static bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* pdata);
 static bool yfy_data_unpack(yfy_module_info_type_t type, uint8_t cmd, uint8_t module_addr, uint8_t* p_data);
 static void yfy_data_store(uint8_t byte_start, uint8_t byte_end, uint8_t bit_start, uint8_t bit_endd, uint8_t addr, uint8_t* pdata, void* pstore_data);
+static void module_online_check(void);
 
 yfy_module_online_info_t stModuleOnlineInfo[MODULE_NUM] = {0};
 
@@ -189,7 +190,6 @@ bool yfy_data_parse(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_t* p
         // 记录模块通讯时间
         yfy_module_handle_t* handle = yfy_module_handle_get();
         yfy_module_online_info_t* online_info = get_module_online_info();
-        online_info[module_addr].module_addr = module_addr;
         online_info[module_addr].last_online_time = handle->time();
         online_info[module_addr].is_online = true;
 
@@ -360,7 +360,7 @@ void yfy_send_write_cmd(uint8_t dev_id, uint8_t cmd, uint8_t module_addr, uint8_
 /**
  * @brief 检查模块在线状态
  */
-void module_online_check(void)
+static void module_online_check(void)
 {
     static uint32_t last_check_time = 0;
     uint32_t current_time = module_handle.time();

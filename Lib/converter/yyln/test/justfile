@@ -1,0 +1,205 @@
+# YYLN模块测试构建脚本
+# 使用just命令运行: just <target>
+
+# 设置shell（跨平台兼容）
+set shell := ["powershell.exe", "-c"]
+
+# 默认编译器设置
+CC := "gcc"
+CFLAGS := "-Wall -Wextra -std=c99 -I.. -I../../../.."
+
+# 默认目标：运行所有测试
+default: all
+
+# 编译并运行所有测试
+all: clean build-all run-all
+
+# 清理所有生成的文件
+clean:
+    @echo "清理测试文件..."
+    @if (Test-Path "*.exe") { Remove-Item -Force *.exe -ErrorAction SilentlyContinue }
+    @if (Test-Path "*.o") { Remove-Item -Force *.o -ErrorAction SilentlyContinue }
+    @echo "清理完成"
+
+# 构建所有测试程序
+build-all: build-interface build-get-functions build-id build-process build-write-cmd build-endian build-online-check build-ordered-get
+
+# 运行所有测试程序
+run-all: run-interface run-get-functions run-id run-process run-write-cmd run-endian run-online-check run-ordered-get
+
+# ===== 接口函数测试 =====
+build-interface:
+    @echo "编译接口函数测试程序..."
+    {{CC}} {{CFLAGS}} test_yyln_interface.c -o test_yyln_interface.exe
+
+run-interface: build-interface
+    @echo "运行接口函数测试..."
+    @if (Test-Path "test_yyln_interface.exe") { ./test_yyln_interface.exe } else { echo "测试程序不存在" }
+    @echo ""
+
+test-interface: run-interface
+
+# ===== 数据获取函数测试 =====
+build-get-functions:
+    @echo "编译数据获取函数测试程序..."
+    {{CC}} {{CFLAGS}} test_yyln_get_functions.c -o test_yyln_get_functions.exe
+
+run-get-functions: build-get-functions
+    @echo "运行数据获取函数测试..."
+    @./test_yyln_get_functions.exe
+    @echo ""
+
+test-get-functions: run-get-functions
+
+# ===== ID宏测试 =====
+build-id:
+    @echo "编译ID宏测试程序..."
+    {{CC}} {{CFLAGS}} test_yyln_id.c -o test_yyln_id.exe
+
+run-id: build-id
+    @echo "运行ID宏测试..."
+    @./test_yyln_id.exe
+    @echo ""
+
+test-id: run-id
+
+# ===== 数据处理测试 =====
+build-process:
+    @echo "编译数据处理测试程序..."
+    {{CC}} {{CFLAGS}} test_yyln_process.c -o test_yyln_process.exe
+
+run-process: build-process
+    @echo "运行数据处理测试..."
+    @./test_yyln_process.exe
+    @echo ""
+
+test-process: run-process
+
+# ===== 写命令测试 =====
+build-write-cmd:
+    @echo "编译写命令测试程序..."
+    {{CC}} {{CFLAGS}} test_write_cmd.c -o test_write_cmd.exe
+
+run-write-cmd: build-write-cmd
+    @echo "运行写命令测试..."
+    @./test_write_cmd.exe
+    @echo ""
+
+test-write-cmd: run-write-cmd
+
+# ===== 字节序转换测试 =====
+build-endian:
+    @echo "编译字节序转换测试程序..."
+    {{CC}} {{CFLAGS}} test_endian_conversion.c -o test_endian_conversion.exe
+
+run-endian: build-endian
+    @echo "运行字节序转换测试..."
+    @./test_endian_conversion.exe
+    @echo ""
+
+test-endian: run-endian
+
+# ===== 在线检查测试 =====
+build-online-check:
+    @echo "编译在线检查测试程序..."
+    {{CC}} {{CFLAGS}} test_online_check.c -o test_online_check.exe
+
+run-online-check: build-online-check
+    @echo "运行在线检查测试..."
+    @./test_online_check.exe
+    @echo ""
+
+test-online-check: run-online-check
+
+# ===== 有序获取函数测试 =====
+build-ordered-get:
+    @echo "编译有序获取函数测试程序..."
+    {{CC}} {{CFLAGS}} test_ordered_get_functions.c -o test_ordered_get_functions.exe
+
+run-ordered-get: build-ordered-get
+    @echo "运行有序获取函数测试..."
+    @./test_ordered_get_functions.exe
+    @echo ""
+
+test-ordered-get: run-ordered-get
+
+# ===== 单独测试目标 =====
+# 只测试新的接口函数
+interface: test-interface
+
+# 快速测试（只测试接口函数）
+quick: clean interface
+    @echo "✅ 快速测试完成"
+
+# 只测试数据获取函数
+get-functions: test-get-functions
+
+# 只测试ID宏
+id: test-id
+
+# 只测试数据处理
+process: test-process
+
+# 只测试写命令
+write-cmd: test-write-cmd
+
+# 只测试字节序转换
+endian: test-endian
+
+# 只测试在线检查
+online-check: test-online-check
+
+# 只测试有序获取函数
+ordered-get: test-ordered-get
+
+# ===== 调试和开发目标 =====
+# 编译时显示详细信息
+verbose-build:
+    @echo "详细编译接口函数测试程序..."
+    {{CC}} {{CFLAGS}} -v test_yyln_interface.c -o test_yyln_interface.exe
+
+# 使用调试信息编译
+debug-build:
+    @echo "编译调试版本..."
+    {{CC}} {{CFLAGS}} -g -DDEBUG test_yyln_interface.c -o test_yyln_interface_debug.exe
+
+# 检查代码风格
+check-style:
+    @echo "检查代码风格..."
+    @if command -v clang-format >/dev/null 2>&1; then \
+        clang-format --dry-run --Werror *.c *.h 2>/dev/null || echo "代码风格检查完成"; \
+    else \
+        echo "clang-format未安装，跳过代码风格检查"; \
+    fi
+
+# 显示帮助信息
+help:
+    @echo "YYLN模块测试构建脚本"
+    @echo "===================="
+    @echo ""
+    @echo "主要目标:"
+    @echo "  all              - 清理、构建并运行所有测试"
+    @echo "  clean            - 清理生成的文件"
+    @echo "  build-all        - 构建所有测试程序"
+    @echo "  run-all          - 运行所有测试程序"
+    @echo ""
+    @echo "单独测试目标:"
+    @echo "  interface        - 测试接口函数"
+    @echo "  get-functions    - 测试数据获取函数"
+    @echo "  id               - 测试ID宏"
+    @echo "  process          - 测试数据处理"
+    @echo "  write-cmd        - 测试写命令"
+    @echo "  endian           - 测试字节序转换"
+    @echo "  online-check     - 测试在线检查"
+    @echo "  ordered-get      - 测试有序获取函数"
+    @echo ""
+    @echo "开发目标:"
+    @echo "  verbose-build    - 详细编译信息"
+    @echo "  debug-build      - 编译调试版本"
+    @echo "  check-style      - 检查代码风格"
+    @echo "  help             - 显示此帮助信息"
+    @echo ""
+    @echo "使用示例:"
+    @echo "  just              - 运行所有测试"
+    @echo "  just interface    - 只测试接口函数"
+    @echo "  just clean        - 清理文件"

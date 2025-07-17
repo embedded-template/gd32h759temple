@@ -7,6 +7,7 @@
 typedef enum module_type_t
 {
     eModuleTypeYfy,
+    eModuleTypeYyln,
     eModuleTypeMax,
 } module_type_t;
 

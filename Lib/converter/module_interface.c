@@ -1,20 +1,33 @@
 #include "module_interface.h"
 #include "can/module_can.h"
+#include "yyln_interface.h"
 #include "log.h"
 
 static bool power_interface_init(module_type_t module_type);
 
 TaskHandle_t yfy_module_task_handle = NULL;
+TaskHandle_t yyln_module_task_handle = NULL;
+
+void yfy_module_task(void* pvParameters);
+void yyln_module_task(void* pvParameters);
 
 power_interface_t power_interface[eModuleTypeMax] = {
     {
         .xHandle = NULL,
-        .module_task = NULL,
+        .module_task = yfy_module_task,
         .power_manage = NULL,
         .name = "yfy module",
         .module_type_query = yfy_module_check,
         .module_type_ok = yfy_module_ok,
     },
+    {
+        .xHandle = NULL,
+        .module_task = yyln_module_task,
+        .power_manage = NULL,
+        .name = "yyln module",
+        .module_type_query = yyln_module_check,
+        .module_type_ok = yyln_module_ok,
+    }
 };
 
 power_interface_t* power_control = NULL;
@@ -91,6 +104,16 @@ void yfy_module_task(void* pvParameters)
     }
 }
 
+void yyln_module_task(void* pvParameters)
+{
+    yyln_module_handle_init(module_data_send, module_data_recv, module_data_time);
+    while (1)
+    {
+        yyln_process_data();
+        vTaskDelay(pdMS_TO_TICKS(*(uint32_t*) pvParameters));
+    }
+}
+
 /**
  * @brief 只初始化一次
  *
@@ -99,8 +122,11 @@ void power_interface_pre_init(void)
 {
     // yfy 电源模块
     power_interface[eModuleTypeYfy].xHandle = yfy_module_task_handle;
-    power_interface[eModuleTypeYfy].module_task = yfy_module_task;
     power_interface[eModuleTypeYfy].power_manage = NULL; // TODO:添加控制策略
+
+    // yyln 电源模块
+    power_interface[eModuleTypeYyln].xHandle = yyln_module_task_handle;
+    power_interface[eModuleTypeYyln].power_manage = NULL; // TODO:添加控制策略
 }
 
 /**

@@ -177,7 +177,6 @@ typedef enum yfy_module_info_type_t
 
 typedef struct yfy_module_online_info_t
 {
-    uint8_t module_addr;
     uint32_t last_online_time;
     bool is_online;
 } yfy_module_online_info_t;
@@ -194,7 +193,5 @@ void yfy_module_handle_init(bool (*send)(uint32_t id, uint8_t* pdata), bool (*re
 yfy_module_handle_t* yfy_module_handle_get(void);
 
 void yfy_process_data(void);
-
-void module_online_check(void);
 
 yfy_module_online_info_t* get_module_online_info(void);
