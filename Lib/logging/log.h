@@ -1,10 +1,10 @@
 #pragma once
 
-#include "logging_stack.h"
 #include "FreeRTOS.h"
+#include "logging_stack.h"
 #include "task.h"
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 // 获取系统时间字符串的函数声明
 static inline const char* get_system_time_string(void)
@@ -13,7 +13,7 @@ static inline const char* get_system_time_string(void)
     TickType_t current_tick = xTaskGetTickCount();
 
     // 将tick转换为毫秒 (configTICK_RATE_HZ = 1000, 所以1 tick = 1ms)
-    uint32_t total_ms = (uint32_t)current_tick;
+    uint32_t total_ms = (uint32_t) current_tick;
 
     // 计算时、分、秒、毫秒
     uint32_t hours = total_ms / (1000U * 60U * 60U);
@@ -22,8 +22,7 @@ static inline const char* get_system_time_string(void)
     uint32_t milliseconds = total_ms % 1000U;
 
     // 格式化时间字符串 HH:MM:SS.mmm
-    snprintf(time_buffer, sizeof(time_buffer), "%02u:%02u:%02u.%03u",
-             hours, minutes, seconds, milliseconds);
+    snprintf(time_buffer, sizeof(time_buffer), "%02u:%02u:%02u.%03u", hours, minutes, seconds, milliseconds);
 
     return time_buffer;
 }

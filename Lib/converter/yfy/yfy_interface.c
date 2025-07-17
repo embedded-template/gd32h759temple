@@ -1413,7 +1413,7 @@ bool yfy_module_ok(void)
 {
     uint8_t num = 0;
     yfy_get_sys_module_num(&num);
-    if(num > 0)
+    if (num > 0)
     {
         return true;
     }

@@ -2,11 +2,11 @@
 
 #include "FreeRTOS.h"
 #include "can.h"
-#include "task.h"
-#include "queue.h"
 #include "gd32h7xx_can.h"
-#include <stdint.h>
+#include "queue.h"
+#include "task.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 #define MODULE_RING_BUFFER_RX_SIZE 16 * 10 // 10条数据的缓存
 #define MODULE_RING_BUFFER_TX_SIZE 16 * 10 // 10条数据的缓存

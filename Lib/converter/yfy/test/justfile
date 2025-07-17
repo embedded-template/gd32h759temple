@@ -6,7 +6,7 @@ set shell := ["powershell.exe", "-c"]
 
 # 设置变量
 CC := "gcc"
-CFLAGS := "-I../../../utilities -I.."
+CFLAGS := "-I../../.. -I.. -I../../"
 SOURCES := "../yfy_data.c ../yfy_interface.c"
 BUILD_DIR := "build"
 

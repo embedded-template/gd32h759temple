@@ -1,7 +1,7 @@
 #pragma once
+#include "driver_test_config.h"
 #include "gd32h7xx.h"
 #include "ring_buffer.h"
-#include "driver_test_config.h"
 
 typedef struct can_handle_t
 {

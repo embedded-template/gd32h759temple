@@ -1,8 +1,8 @@
 #pragma once
+#include "module_config.h"
 #include "stdbool.h"
 #include "stdint.h"
 
-#define MODULE_NUM 12
 // 存在一个空闲组，因此组号比模块数多1.组号从1开始。空闲组为1。
 #define GROUP_MODULE_NUM (MODULE_NUM + 1)
 // 广播

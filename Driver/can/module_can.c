@@ -1,7 +1,6 @@
 #include "module_can.h"
 #include "stdio.h"
 
-
 /** @brief CAN中断接收缓冲区，32字节对齐 */
 __attribute__((aligned(32))) uint32_t module_rx_buffer[4];
 
@@ -11,7 +10,6 @@ RING_BUFF_PRE_INIT(module_tx, MODULE_RING_BUFFER_TX_SIZE);
 
 /** @brief CAN模块句柄 */
 can_handle_t module_can_handle = {0};
-
 
 static void module_can_hw_init(void);
 static void module_can_gpio_config(void);
@@ -52,12 +50,10 @@ void module_can_init(void)
     /* 创建CAN任务 */
     xTaskCreate(module_tx_task, "module_tx", 100, NULL, 28, NULL);
     xTaskCreate(module_rx_task, "module_rx", 100, NULL, 29, NULL);
-    #ifdef MODULE_CAN_TEST
+#ifdef MODULE_CAN_TEST
     xTaskCreate(module_can_test_task, "can_test", 200, NULL, 3, NULL);
-    #endif
+#endif
 }
-
-
 
 /**
  * @brief CAN硬件初始化
@@ -172,7 +168,6 @@ static void module_can_fifo_config(void)
     can_flag_clear(MODULE_CAN_PERIPH, MODULE_CAN_TX_MAILBOX_FLAG);
 }
 
-
 /**
  * @brief CAN发送任务
  * @details 从发送环形缓冲区中读取数据并通过邮箱8发送
@@ -184,7 +179,7 @@ void module_tx_task(void* pvParameters)
     uint32_t data[3] = {0};
 
     /* 避免编译器警告 */
-    (void)pvParameters;
+    (void) pvParameters;
 
     while (1)
     {
@@ -194,16 +189,16 @@ void module_tx_task(void* pvParameters)
             can_struct_para_init(CAN_MDSC_STRUCT, &mdpara);
 
             /* 从发送缓冲区读取数据 */
-            if (module_can_handle.tx_ring_buffer->read((uint8_t*)&data, sizeof(data), MODULE_CAN_TIMEOUT_MS) > 0)
+            if (module_can_handle.tx_ring_buffer->read((uint8_t*) &data, sizeof(data), MODULE_CAN_TIMEOUT_MS) > 0)
             {
                 /* 配置邮箱参数 */
-                mdpara.ide = 1U;                        /* 扩展帧 */
-                mdpara.rtr = 0U;                        /* 数据帧 */
-                mdpara.esi = 0U;                        /* 错误状态指示器 */
-                mdpara.code = CAN_MB_TX_STATUS_DATA;    /* 发送数据状态 */
+                mdpara.ide = 1U;                     /* 扩展帧 */
+                mdpara.rtr = 0U;                     /* 数据帧 */
+                mdpara.esi = 0U;                     /* 错误状态指示器 */
+                mdpara.code = CAN_MB_TX_STATUS_DATA; /* 发送数据状态 */
                 mdpara.data_bytes = MODULE_CAN_DATA_BYTES;
-                mdpara.id = data[0] & 0x1FFFFFFF;       /* CAN ID (确保在29位范围内) */
-                mdpara.data = &data[1];                 /* 数据指针 */
+                mdpara.id = data[0] & 0x1FFFFFFF; /* CAN ID (确保在29位范围内) */
+                mdpara.data = &data[1];           /* 数据指针 */
 
                 /* 发送数据 */
                 can_mailbox_config(MODULE_CAN_PERIPH, MODULE_CAN_TX_MAILBOX, &mdpara);
@@ -237,7 +232,7 @@ void module_rx_task(void* pvParameters)
     can_rx_fifo_struct rx_fifo;
     uint32_t data[3] = {0};
     /* 避免编译器警告 */
-    (void)pvParameters;
+    (void) pvParameters;
 
     while (1)
     {
@@ -250,7 +245,7 @@ void module_rx_task(void* pvParameters)
             data[2] = rx_fifo.data[1];
 
             /* 写入接收环形缓冲区 */
-            module_can_handle.rx_ring_buffer->write((uint8_t*)data, sizeof(data), MODULE_CAN_TIMEOUT_MS);
+            module_can_handle.rx_ring_buffer->write((uint8_t*) data, sizeof(data), MODULE_CAN_TIMEOUT_MS);
         }
 
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -268,10 +263,10 @@ void MODULE_CAN_IRQHandler(void)
     if (can_interrupt_flag_get(MODULE_CAN_PERIPH, CAN_INT_FLAG_FIFO_AVAILABLE) == SET)
     {
         /* 读取FIFO数据 */
-        can_rx_fifo_read(MODULE_CAN_PERIPH, (can_rx_fifo_struct*)module_rx_buffer);
+        can_rx_fifo_read(MODULE_CAN_PERIPH, (can_rx_fifo_struct*) module_rx_buffer);
 
         /* 发送到队列 */
-        xQueueSendFromISR(module_can_handle.rx_queue, (void*)module_rx_buffer, &xHigherPriorityTaskWoken);
+        xQueueSendFromISR(module_can_handle.rx_queue, (void*) module_rx_buffer, &xHigherPriorityTaskWoken);
 
         /* 清除中断标志 */
         can_interrupt_flag_clear(MODULE_CAN_PERIPH, CAN_INT_FLAG_FIFO_AVAILABLE);
@@ -280,7 +275,6 @@ void MODULE_CAN_IRQHandler(void)
     /* 如果有更高优先级任务被唤醒，则进行任务切换 */
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
-
 
 #ifdef MODULE_CAN_TEST
 /**
@@ -298,7 +292,7 @@ static void module_can_test_task(void* pvParameters)
     uint32_t error_count = 0;
 
     /* 避免编译器警告 */
-    (void)pvParameters;
+    (void) pvParameters;
 
     /* 等待CAN模块初始化完成 */
     vTaskDelay(pdMS_TO_TICKS(1000));
@@ -306,25 +300,23 @@ static void module_can_test_task(void* pvParameters)
     while (1)
     {
         /* 准备发送数据 */
-        tx_data[0] = 0x123;  /* CAN ID */
-        tx_data[1] = 0x12345678 ;       /* 数据1 */
-        tx_data[2] = 0x87654321 ;       /* 数据2 */
+        tx_data[0] = 0x123;      /* CAN ID */
+        tx_data[1] = 0x12345678; /* 数据1 */
+        tx_data[2] = 0x87654321; /* 数据2 */
 
         /* 发送数据到发送环形缓冲区 */
-        if (module_can_handle.tx_ring_buffer->write((uint8_t*)tx_data, sizeof(tx_data), MODULE_CAN_TIMEOUT_MS) > 0)
+        if (module_can_handle.tx_ring_buffer->write((uint8_t*) tx_data, sizeof(tx_data), MODULE_CAN_TIMEOUT_MS) > 0)
         {
             tx_count++;
         }
 
         /* 尝试接收数据 */
-        while (module_can_handle.rx_ring_buffer->read((uint8_t*)rx_data, sizeof(rx_data), 10) > 0)
+        while (module_can_handle.rx_ring_buffer->read((uint8_t*) rx_data, sizeof(rx_data), 10) > 0)
         {
             rx_count++;
 
             /* 简单的数据验证（在回环模式下，发送的数据应该能收到） */
-            if ((rx_data[0] != 0x123) ||
-                (rx_data[1] != 0x12345678) ||
-                (rx_data[2] != 0x87654321))
+            if ((rx_data[0] != 0x123) || (rx_data[1] != 0x12345678) || (rx_data[2] != 0x87654321))
             {
                 error_count++;
             }

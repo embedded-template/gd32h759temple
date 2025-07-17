@@ -43,9 +43,9 @@ bool module_data_send(uint32_t id, uint8_t* pdata)
     can_handle_t* handle = module_can_handle_get();
     uint32_t data[3] = {0};
     data[0] = id;
-    data[1] = *(uint32_t*)pdata;
-    data[2] = *(uint32_t*)(pdata + 4);
-    if(handle->tx_ring_buffer->write((uint8_t*)data, sizeof(data), MODULE_CAN_TIMEOUT_MS) > 0)
+    data[1] = *(uint32_t*) pdata;
+    data[2] = *(uint32_t*) (pdata + 4);
+    if (handle->tx_ring_buffer->write((uint8_t*) data, sizeof(data), MODULE_CAN_TIMEOUT_MS) > 0)
     {
         return true;
     }
@@ -59,11 +59,11 @@ bool module_data_recv(uint32_t id, uint8_t* pdata)
 {
     can_handle_t* handle = module_can_handle_get();
     uint32_t data[3] = {0};
-    if(handle->rx_ring_buffer->read((uint8_t*)data, sizeof(data), MODULE_CAN_TIMEOUT_MS) > 0)
+    if (handle->rx_ring_buffer->read((uint8_t*) data, sizeof(data), MODULE_CAN_TIMEOUT_MS) > 0)
     {
         id = data[0];
-        *(uint32_t*)pdata = data[1];
-        *(uint32_t*)(pdata + 4) = data[2];
+        *(uint32_t*) pdata = data[1];
+        *(uint32_t*) (pdata + 4) = data[2];
         return true;
     }
     return false;
@@ -100,7 +100,7 @@ void power_interface_pre_init(void)
     // yfy 电源模块
     power_interface[eModuleTypeYfy].xHandle = yfy_module_task_handle;
     power_interface[eModuleTypeYfy].module_task = yfy_module_task;
-    power_interface[eModuleTypeYfy].power_manage = NULL;    //TODO:添加控制策略
+    power_interface[eModuleTypeYfy].power_manage = NULL; // TODO:添加控制策略
 }
 
 /**
@@ -108,7 +108,7 @@ void power_interface_pre_init(void)
  */
 void module_interface_init_task(void* pvParameters)
 {
-    //等待硬件初始化完成
+    // 等待硬件初始化完成
     vTaskDelay(pdMS_TO_TICKS(1000));
     power_interface_pre_init();
     while (1)
@@ -116,12 +116,12 @@ void module_interface_init_task(void* pvParameters)
         // 先初始化一个接口，并发送数据，如果没有回复，则说明接口不匹配，再初始化下一个接口。
         uint32_t count = 10;
         bool found = false;
-        for(uint16_t i = 0; i < eModuleTypeMax && !found; i++)
+        for (uint16_t i = 0; i < eModuleTypeMax && !found; i++)
         {
             xTaskCreate(power_interface[i].module_task, power_interface[i].name, 100, NULL, 5, &power_interface[i].xHandle);
             while (count-- && !found)
             {
-                //询问系统的模块数量
+                // 询问系统的模块数量
                 power_interface[i].module_type_query();
                 vTaskDelay(pdMS_TO_TICKS(100));
                 uint8_t module_num = 0;
@@ -130,23 +130,23 @@ void module_interface_init_task(void* pvParameters)
                     Log_info("找到电源接口: %s\n", power_interface[i].name);
                     found = true; // 设置标志，两层循环都会退出
                     power_interface_init(i);
-                    //TODO:创建功率调度任务
-                    //xTaskCreate(power_interface[i].power_manage, "power_manage", 100, NULL, 5, NULL);
+                    // TODO:创建功率调度任务
+                    // xTaskCreate(power_interface[i].power_manage, "power_manage", 100, NULL, 5, NULL);
                 }
             }
             count = 10;
             vTaskDelete(power_interface[i].xHandle);
         }
 
-        if(!found)
+        if (!found)
         {
-            //没有找到匹配的接口，等待下次重试
+            // 没有找到匹配的接口，等待下次重试
             Log_error("没有找到电源接口，5s后重试\n");
             vTaskDelay(pdMS_TO_TICKS(5000));
             continue;
         }
 
-        //已经找到匹配的接口，退出任务
+        // 已经找到匹配的接口，退出任务
         vTaskDelete(NULL);
     }
 }

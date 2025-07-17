@@ -68,8 +68,7 @@
 
 #ifndef LOG_METADATA_ARGS
 #define LOG_METADATA_ARGS                                                                                                                                      \
-    __FUNCTION__, __LINE__ /**< @brief Arguments into the metadata logging                                                                                     \
-                              prefix format. */
+    __FUNCTION__, __LINE__ /**< @brief Arguments into the metadata logging \ prefix format. */
 #endif
 
 #define SdkLog(X) printf X
@@ -182,9 +181,9 @@
 #define LogDebug(message)
 
 #endif /* if LIBRARY_LOG_LEVEL == LOG_NONE */
-#endif /* if !defined( LIBRARY_LOG_LEVEL ) || ( ( LIBRARY_LOG_LEVEL !=                                                                                         \
-          LOG_NONE ) && ( LIBRARY_LOG_LEVEL != LOG_ERROR ) && (                                                                                                \
-          LIBRARY_LOG_LEVEL != LOG_WARN ) && ( LIBRARY_LOG_LEVEL != LOG_INFO )                                                                                 \
+#endif /* if !defined( LIBRARY_LOG_LEVEL ) || ( ( LIBRARY_LOG_LEVEL != \                                                                                                                                                             \
+          LOG_NONE ) && ( LIBRARY_LOG_LEVEL != LOG_ERROR ) && ( \                                                                                                                                                             \
+          LIBRARY_LOG_LEVEL != LOG_WARN ) && ( LIBRARY_LOG_LEVEL != LOG_INFO ) \                                                                                                                                                             \
           && ( LIBRARY_LOG_LEVEL != LOG_DEBUG ) ) */
 
 #endif /* ifndef LOGGING_STACK_H */

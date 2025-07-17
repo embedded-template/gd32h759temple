@@ -108,8 +108,8 @@ yfy_group_module_info_t stGroupModuleInfo[] = {
     {.cmd = 0x02, .byte_start = 2, .byte_end = 3, .bit_start = 0, .bit_end = 0, .pdata = &stGroupModuleData.module_num[0]}};
 
 yfy_sys_module_inf_t stSysModuleInf[] = {{.cmd = 0x01, .byte_start = 0, .byte_end = 4, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.voltage},
-                                     {.cmd = 0x01, .byte_start = 4, .byte_end = 8, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.current},
-                                     {.cmd = 0x02, .byte_start = 2, .byte_end = 3, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.module_num}};
+                                         {.cmd = 0x01, .byte_start = 4, .byte_end = 8, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.current},
+                                         {.cmd = 0x02, .byte_start = 2, .byte_end = 3, .bit_start = 0, .bit_end = 0, .pdata = &stSysModuleData.module_num}};
 
 yfy_set_moduole_inf_t stSetModuleInf[] = {
     {.cmd = 0x13, .byte_start = 0, .byte_end = 1}, {.cmd = 0x14, .byte_start = 0, .byte_end = 1}, {.cmd = 0x16, .byte_start = 0, .byte_end = 1},

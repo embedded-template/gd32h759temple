@@ -1,4 +1,5 @@
 #include "main.h"
+#include "can/module_can.h"
 #include "cli.h"
 #include "gd32h7xx.h"
 #include "log.h"
@@ -7,11 +8,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include "can/module_can.h"
 
-task_info_t task_info_all[] = {
-    {CLI_Task, NAME_cli_task, STACK_cli_task, PARAM_cli_task, PRIORITY_cli_task, NULL},
-    {module_interface_init_task, NAME_module_interface_init_task, STACK_module_interface_init_task, PARAM_module_interface_init_task, PRIORITY_module_interface_init_task, NULL}};
+task_info_t task_info_all[] = {{CLI_Task, NAME_cli_task, STACK_cli_task, PARAM_cli_task, PRIORITY_cli_task, NULL},
+                               {module_interface_init_task, NAME_module_interface_init_task, STACK_module_interface_init_task, PARAM_module_interface_init_task,
+                                PRIORITY_module_interface_init_task, NULL}};
 
 #define TASK_NUM (sizeof(task_info_all) / sizeof(task_info_t))
 
