@@ -277,6 +277,7 @@ void MODULE_CAN_IRQHandler(void)
 }
 
 #ifdef MODULE_CAN_TEST
+#include "string.h"
 /**
  * @brief CAN测试任务
  * @details 定期发送测试数据并接收数据进行验证
@@ -299,10 +300,10 @@ static void module_can_test_task(void* pvParameters)
 
     while (1)
     {
+        uint8_t data[8] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
         /* 准备发送数据 */
         tx_data[0] = 0x123;      /* CAN ID */
-        tx_data[1] = 0x12345678; /* 数据1 */
-        tx_data[2] = 0x87654321; /* 数据2 */
+        memcpy(tx_data + 1, data, sizeof(data));
 
         /* 发送数据到发送环形缓冲区 */
         if (module_can_handle.tx_ring_buffer->write((uint8_t*) tx_data, sizeof(tx_data), MODULE_CAN_TIMEOUT_MS) > 0)
@@ -316,7 +317,7 @@ static void module_can_test_task(void* pvParameters)
             rx_count++;
 
             /* 简单的数据验证（在回环模式下，发送的数据应该能收到） */
-            if ((rx_data[0] != 0x123) || (rx_data[1] != 0x12345678) || (rx_data[2] != 0x87654321))
+            if ((rx_data[0] != 0x123) || (rx_data[1] != 0x04030201) || (rx_data[2] != 0x08070605))
             {
                 error_count++;
             }
