@@ -98,14 +98,24 @@ static BaseType_t prvTaskStatsCommand(char* pcWriteBuffer, size_t xWriteBufferLe
 {
     (void) pcCommandString;
 
-    TaskStatus_t xTaskArray[6]; // 支持最多6个任务
+    TaskStatus_t xTaskArray[10]; // 支持最多10个任务
     UBaseType_t uxArraySize;
     char* pcPtr = pcWriteBuffer;
     size_t xRemaining = xWriteBufferLen;
     int iLen;
 
     // 获取任务信息
-    uxArraySize = uxTaskGetSystemState(xTaskArray, 6, NULL);
+    uxArraySize = uxTaskGetSystemState(xTaskArray, 10, NULL);
+
+    if(uxArraySize == 0)
+    {
+        snprintf(pcWriteBuffer, xWriteBufferLen,
+                "错误: 支持打印的任务总数太少或获取任务状态失败\r\n"
+                "  数组大小: 10\r\n"
+                "  实际任务数可能超过数组大小\r\n"
+                "  或系统未启用任务统计功能(configUSE_TRACE_FACILITY)\r\n\r\n");
+        return pdFALSE;
+    }
 
     // 输出每个任务
     for (UBaseType_t x = 0; x < uxArraySize && xRemaining > 50; x++)
@@ -159,13 +169,13 @@ static BaseType_t prvResetCommand(char* pcWriteBuffer, size_t xWriteBufferLen, c
     (void) pcCommandString;
 
     snprintf(pcWriteBuffer, xWriteBufferLen, "执行软件复位...\r\n");
-    
+
     // 确保消息输出后再执行复位
     printf("%s", pcWriteBuffer);
-    
+
     // 调用CMSIS提供的系统复位函数
     NVIC_SystemReset();
-    
+
     // 正常情况下不会执行到这里，因为系统已经复位
     return pdFALSE;
 }
