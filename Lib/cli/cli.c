@@ -19,6 +19,9 @@
 
 #include "usart/console_usart.h"
 
+/* CMSIS includes */
+#include "core_cm7.h"
+
 /* 函数声明 */
 static BaseType_t prvLedCommand(char* pcWriteBuffer, size_t xWriteBufferLen, const char* pcCommandString);
 static BaseType_t prvInfoCommand(char* pcWriteBuffer, size_t xWriteBufferLen, const char* pcCommandString);
@@ -26,6 +29,7 @@ static BaseType_t prvMemoryCommand(char* pcWriteBuffer, size_t xWriteBufferLen, 
 static BaseType_t prvTaskStatsCommand(char* pcWriteBuffer, size_t xWriteBufferLen, const char* pcCommandString);
 static BaseType_t prvSetCommand(char* pcWriteBuffer, size_t xWriteBufferLen, const char* pcCommandString);
 static BaseType_t prvGetCommand(char* pcWriteBuffer, size_t xWriteBufferLen, const char* pcCommandString);
+static BaseType_t prvResetCommand(char* pcWriteBuffer, size_t xWriteBufferLen, const char* pcCommandString);
 
 static const CLI_Command_Definition_t xInfoCommand = {
     "info", "\r\ninfo:\r\n 显示系统信息\r\n", prvInfoCommand, 0 /* 无参数 */
@@ -34,6 +38,8 @@ static const CLI_Command_Definition_t xInfoCommand = {
 static const CLI_Command_Definition_t xMemoryCommand = {"memory", "\r\nmemory:\r\n 显示内存使用情况\r\n", prvMemoryCommand, 0};
 
 static const CLI_Command_Definition_t xTaskStatsCommand = {"tasks", "\r\ntasks:\r\n 显示任务状态信息\r\n", prvTaskStatsCommand, 0};
+
+static const CLI_Command_Definition_t xResetCommand = {"reset", "\r\nreset:\r\n 执行软件复位\r\n", prvResetCommand, 0};
 
 /**
  * @brief CLI初始化
@@ -45,6 +51,7 @@ void CLI_Init(void)
     FreeRTOS_CLIRegisterCommand(&xInfoCommand);
     FreeRTOS_CLIRegisterCommand(&xMemoryCommand);
     FreeRTOS_CLIRegisterCommand(&xTaskStatsCommand);
+    FreeRTOS_CLIRegisterCommand(&xResetCommand);
 }
 
 /**
@@ -141,6 +148,25 @@ static BaseType_t prvTaskStatsCommand(char* pcWriteBuffer, size_t xWriteBufferLe
         xRemaining -= iLen;
     }
 
+    return pdFALSE;
+}
+
+/**
+ * @brief 软件复位命令处理函数
+ */
+static BaseType_t prvResetCommand(char* pcWriteBuffer, size_t xWriteBufferLen, const char* pcCommandString)
+{
+    (void) pcCommandString;
+
+    snprintf(pcWriteBuffer, xWriteBufferLen, "执行软件复位...\r\n");
+    
+    // 确保消息输出后再执行复位
+    printf("%s", pcWriteBuffer);
+    
+    // 调用CMSIS提供的系统复位函数
+    NVIC_SystemReset();
+    
+    // 正常情况下不会执行到这里，因为系统已经复位
     return pdFALSE;
 }
 
