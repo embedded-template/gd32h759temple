@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "can/module_can.h"
+#include "gd32h7xx.h"
 
 task_info_t task_info_all[] = {
     {CLI_Task, NAME_cli_task, STACK_cli_task, PARAM_cli_task, PRIORITY_cli_task, NULL},};
@@ -29,6 +30,33 @@ void cache_enable(void)
     SCB_EnableDCache();
 }
 
+void check_reset_source(void)
+{
+    if (rcu_flag_get(RCU_FLAG_BORRST)) {
+        Log_info("BOR reset");
+    }
+    if (rcu_flag_get(RCU_FLAG_EPRST)) {
+        Log_info("External reset");
+    }
+    if (rcu_flag_get(RCU_FLAG_PORRST)) {
+        Log_info("Power-on reset");
+    }
+    if (rcu_flag_get(RCU_FLAG_SWRST)) {
+        Log_info("Software reset");
+    }
+    if (rcu_flag_get(RCU_FLAG_FWDGTRST)) {
+        Log_info("free watchdog timer reset flag");
+    }
+    if (rcu_flag_get(RCU_FLAG_WWDGTRST)) {
+        Log_info("Watchdog reset");
+    }
+    if (rcu_flag_get(RCU_FLAG_LPRST)) {
+        Log_info("Low-power reset");
+    }
+
+    rcu_all_reset_flag_clear();
+}
+
 int main(void)
 {
     uint8_t ucaRxBuf[256];
@@ -40,6 +68,8 @@ int main(void)
 
     console_init();
     module_can_init();
+
+    check_reset_source();
 
     for (int i = 0; i < TASK_NUM; i++)
     {
