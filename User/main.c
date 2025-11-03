@@ -2,7 +2,6 @@
 #include "cli.h"
 #include "gd32h7xx.h"
 #include "log.h"
-#include "power_interface.h"
 #include "usart/console_usart.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -10,8 +9,7 @@
 #include "can/module_can.h"
 
 task_info_t task_info_all[] = {
-    {CLI_Task, NAME_cli_task, STACK_cli_task, PARAM_cli_task, PRIORITY_cli_task, NULL},
-    {power_control_task, NAME_power_control_task, STACK_power_control_task, PARAM_power_control_task, PRIORITY_power_control_task, NULL}};
+    {CLI_Task, NAME_cli_task, STACK_cli_task, PARAM_cli_task, PRIORITY_cli_task, NULL},};
 
 #define TASK_NUM (sizeof(task_info_all) / sizeof(task_info_t))
 

@@ -16,8 +16,8 @@
         <TargetCommonOption>
           <Device>GD32H759IM</Device>
           <Vendor>GigaDevice</Vendor>
-          <PackID>GigaDevice.GD32H7xx_DFP.1.2.0</PackID>
-          <PackURL>https://gd32mcu.com/data/documents/pack/</PackURL>
+          <PackID>GigaDevice.GD32H7xx_DFP.1.4.0</PackID>
+          <PackURL>https://gd32mcu.com</PackURL>
           <Cpu>IRAM(0x24000000,0x000E0000) IRAM2(0x00000000,0x00010000) IROM(0x08000000,0x03C0000) XRAM(0x20000000,0x00010000) XRAM2(0x30000000,0x00004000) XRAM3(0x30004000,0x00004000) CPUTYPE("Cortex-M7") FPU3(DFPU) CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -209,7 +209,7 @@
             <Ir1Chk>1</Ir1Chk>
             <Ir2Chk>0</Ir2Chk>
             <Ra1Chk>1</Ra1Chk>
-            <Ra2Chk>0</Ra2Chk>
+            <Ra2Chk>1</Ra2Chk>
             <Ra3Chk>1</Ra3Chk>
             <Im1Chk>1</Im1Chk>
             <Im2Chk>1</Im2Chk>
@@ -340,7 +340,7 @@
               <MiscControls>-Wno-invalid-source-encoding -fno-finite-math-only</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\Firmware\CMSIS\GD\GD32H7xx\Include;..\Firmware\GD32H7xx_standard_peripheral\Include;..\freeRtos\kernel\include;..\freeRtos\kernel\portable\GCC\ARM_CM7\r0p1;..\User;..\Lib;..\Lib\converter;..\Lib\converter\yfy;..\Lib\ring_buffer;..\Lib\logging;..\Lib\cli;..\Driver</IncludePath>
+              <IncludePath>..\Firmware\CMSIS\GD\GD32H7xx\Include;..\Firmware\GD32H7xx_standard_peripheral\Include;..\freeRtos\kernel\include;..\freeRtos\kernel\portable\GCC\ARM_CM7\r0p1;..\User;..\Lib;..\Lib\ring_buffer;..\Lib\logging;..\Lib\cli;..\Driver</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -392,9 +392,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>User/App</GroupName>
-        </Group>
-        <Group>
           <GroupName>Driver</GroupName>
           <Files>
             <File>
@@ -421,21 +418,6 @@
               <FileName>cli.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Lib\cli\cli.c</FilePath>
-            </File>
-            <File>
-              <FileName>power_interface.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Lib\converter\power_interface.c</FilePath>
-            </File>
-            <File>
-              <FileName>yfy_interface.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Lib\converter\yfy\yfy_interface.c</FilePath>
-            </File>
-            <File>
-              <FileName>yfy_data.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Lib\converter\yfy\yfy_data.c</FilePath>
             </File>
           </Files>
         </Group>

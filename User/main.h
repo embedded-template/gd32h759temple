@@ -17,8 +17,3 @@ typedef struct task_info_t
 #define STACK_cli_task 200
 #define PARAM_cli_task 10
 #define PRIORITY_cli_task 3
-
-#define NAME_power_control_task "power_control"
-#define STACK_power_control_task 200
-#define PARAM_power_control_task 10
-#define PRIORITY_power_control_task 3
