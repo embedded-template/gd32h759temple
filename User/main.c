@@ -1,6 +1,5 @@
 #include "main.h"
 #include "cli.h"
-#include "gd32h7xx.h"
 #include "log.h"
 #include "usart/console_usart.h"
 #include <stdint.h>
