@@ -39,6 +39,9 @@ OF SUCH DAMAGE.
 #include <stdio.h>
 #include "gd32h7xx.h"
 #include "main.h"
+#include "log.h"
+#include "bsp_lan8720a_rtos.h"
+
 
 #define MAX_BUF_SIZE    50
 
@@ -119,14 +122,14 @@ static err_t tcp_client_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err
     \retval     err_t: error value
 */
 
-extern struct tcp_pcb *g_pcb;
+struct tcp_pcb *g_pcb;
 static err_t tcp_client_connected(void *arg, struct tcp_pcb *pcb, err_t err)
-{	
+{
 	  g_pcb = pcb;
     tcp_arg(pcb, mem_calloc(sizeof(struct recev_packet), 1));
     /* configure LwIP to use our call back functions */
     tcp_recv(pcb, tcp_client_recv);
- 
+
     return ERR_OK;
 }
 
@@ -137,18 +140,18 @@ static err_t tcp_client_connected(void *arg, struct tcp_pcb *pcb, err_t err)
     \retval     none
 */
 void tcp_client_init(void)
-{       
+{
     ip_addr_t ipaddr;
     IP4_ADDR(&ipaddr, IP_S_ADDR0, IP_S_ADDR1, IP_S_ADDR2, IP_S_ADDR3);
 
     /* create a new TCP control block  */
     g_pcb = tcp_new();
-	
+
 	  if( g_pcb != NULL)
 		{
 			err_t err;
 			err=tcp_connect(g_pcb, &ipaddr, IP_S_PORT, tcp_client_connected);
-			printf("err %d \n",err);
+			Log_info("err %d \n",err);
 		}
 		else
 		{
@@ -156,4 +159,14 @@ void tcp_client_init(void)
 			memp_free(MEMP_TCP_PCB, g_pcb);
 		}
 
+}
+
+void tcp_client_task(void* pvParameters)
+{
+    TCPIP_Init();
+    while(1)
+    {
+        tcp_client_init();
+        vTaskDelay(pdMS_TO_TICKS(*(uint32_t*) pvParameters));
+    }
 }

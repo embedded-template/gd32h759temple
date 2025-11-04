@@ -308,8 +308,8 @@ void CONSOLE_USART_IRQ_HANDLER(void)
  */
 void console_task_init(void)
 {
-    xTaskCreate(console_rx_task, "console_rx", 50, NULL, 5, NULL);
-    xTaskCreate(console_tx_task, "console_tx", 50, NULL, 5, NULL);
+    xTaskCreate(console_rx_task, "console_rx", 500, NULL, 5, NULL);
+    xTaskCreate(console_tx_task, "console_tx", 500, NULL, 5, NULL);
 
 #ifdef CONSOLE_TEST
     xTaskCreate(console_test, "console_test", 200, NULL, 5, NULL);

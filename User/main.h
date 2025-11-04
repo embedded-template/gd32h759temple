@@ -18,6 +18,11 @@ typedef struct task_info_t
 #define PARAM_cli_task 10
 #define PRIORITY_cli_task 3
 
+#define NAME_tcp_client_task "tcp_client"
+#define STACK_tcp_client_task 200
+#define PARAM_tcp_client_task 2000
+#define PRIORITY_tcp_client_task 3
+
 #define USE_ENET0
 #ifndef USE_ENET0
     #define USE_ENET1
