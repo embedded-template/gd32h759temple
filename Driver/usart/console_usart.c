@@ -4,6 +4,7 @@
 #include "log.h"
 #include "stdbool.h"
 #include "task.h"
+#include "semphr.h"
 #include <stdio.h>
 
 #include "utilities/macro.h"
@@ -15,6 +16,9 @@ RING_BUFF_PRE_INIT(console_rx, CONSOLE_RING_BUFFER_RX_SIZE);
 RING_BUFF_PRE_INIT(console_tx, CONSOLE_RING_BUFFER_TX_SIZE);
 
 uart_handle_t console = {0};
+
+/* Global mutex for thread-safe logging */
+SemaphoreHandle_t g_log_mutex = NULL;
 
 uart_handle_t* get_console(void)
 {
@@ -61,6 +65,11 @@ void console_uart_init(void)
     nvic_irq_enable(CONSOLE_USART_IRQ, 1U, 0U);
 
     usart_enable(CONSOLE_USARTX);
+
+    /* Create mutex for thread-safe logging */
+    if(g_log_mutex == NULL) {
+        g_log_mutex = xSemaphoreCreateMutex();
+    }
 }
 /**
  * @brief 设置console发送DMA，每次发送完都需要重新设置

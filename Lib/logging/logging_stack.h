@@ -43,6 +43,13 @@
 #include <stdint.h>
 #include <stdio.h>
 
+/* FreeRTOS includes for mutex */
+#include "FreeRTOS.h"
+#include "semphr.h"
+
+/* Global mutex for thread-safe logging */
+extern SemaphoreHandle_t g_log_mutex;
+
 /**
  * @brief The name of the library or demo to add as metadata in log messages
  * from the library or demo.
@@ -102,25 +109,45 @@
 #if LIBRARY_LOG_LEVEL == LOG_DEBUG
 /* All log level messages will logged. */
 #define LogAlways(message)                                                                                                                                     \
-    SdkLog(("[ALWAYS] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                       \
-    SdkLog(message);                                                                                                                                           \
-    SdkLog(("\r\n"))
+    do {                                                                                                                                                       \
+        if(g_log_mutex != NULL) xSemaphoreTake(g_log_mutex, portMAX_DELAY);                                                                                   \
+        SdkLog(("[ALWAYS] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                   \
+        SdkLog(message);                                                                                                                                       \
+        SdkLog(("\r\n"));                                                                                                                                      \
+        if(g_log_mutex != NULL) xSemaphoreGive(g_log_mutex);                                                                                                   \
+    } while(0)
 #define LogError(message)                                                                                                                                      \
-    SdkLog(("[ERROR] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                        \
-    SdkLog(message);                                                                                                                                           \
-    SdkLog(("\r\n"))
+    do {                                                                                                                                                       \
+        if(g_log_mutex != NULL) xSemaphoreTake(g_log_mutex, portMAX_DELAY);                                                                                   \
+        SdkLog(("[ERROR] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                    \
+        SdkLog(message);                                                                                                                                       \
+        SdkLog(("\r\n"));                                                                                                                                      \
+        if(g_log_mutex != NULL) xSemaphoreGive(g_log_mutex);                                                                                                   \
+    } while(0)
 #define LogWarn(message)                                                                                                                                       \
-    SdkLog(("[WARN] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                         \
-    SdkLog(message);                                                                                                                                           \
-    SdkLog(("\r\n"))
+    do {                                                                                                                                                       \
+        if(g_log_mutex != NULL) xSemaphoreTake(g_log_mutex, portMAX_DELAY);                                                                                   \
+        SdkLog(("[WARN] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                     \
+        SdkLog(message);                                                                                                                                       \
+        SdkLog(("\r\n"));                                                                                                                                      \
+        if(g_log_mutex != NULL) xSemaphoreGive(g_log_mutex);                                                                                                   \
+    } while(0)
 #define LogInfo(message)                                                                                                                                       \
-    SdkLog(("[INFO] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                         \
-    SdkLog(message);                                                                                                                                           \
-    SdkLog(("\r\n"))
+    do {                                                                                                                                                       \
+        if(g_log_mutex != NULL) xSemaphoreTake(g_log_mutex, portMAX_DELAY);                                                                                   \
+        SdkLog(("[INFO] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                     \
+        SdkLog(message);                                                                                                                                       \
+        SdkLog(("\r\n"));                                                                                                                                      \
+        if(g_log_mutex != NULL) xSemaphoreGive(g_log_mutex);                                                                                                   \
+    } while(0)
 #define LogDebug(message)                                                                                                                                      \
-    SdkLog(("[DEBUG] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                        \
-    SdkLog(message);                                                                                                                                           \
-    SdkLog(("\r\n"))
+    do {                                                                                                                                                       \
+        if(g_log_mutex != NULL) xSemaphoreTake(g_log_mutex, portMAX_DELAY);                                                                                   \
+        SdkLog(("[DEBUG] [%s] " LOG_METADATA_FORMAT, LIBRARY_LOG_TIME, LOG_METADATA_ARGS));                                                                    \
+        SdkLog(message);                                                                                                                                       \
+        SdkLog(("\r\n"));                                                                                                                                      \
+        if(g_log_mutex != NULL) xSemaphoreGive(g_log_mutex);                                                                                                   \
+    } while(0)
 
 #elif LIBRARY_LOG_LEVEL == LOG_INFO
 /* Only INFO, WARNING, ERROR, and ALWAYS messages will be logged. */

@@ -43,15 +43,20 @@ OF SUCH DAMAGE.
 #include "bsp_lan8720a_rtos.h"
 
 
-#define MAX_BUF_SIZE    50
+#define MAX_BUF_SIZE    1000
 
 struct recev_packet {
     int length;
     char bytes[MAX_BUF_SIZE];
 };
 
+/* Connection state tracking */
+static volatile uint8_t g_tcp_connected = 0;
+static uint32_t g_send_counter = 0;
+
 static err_t tcp_client_connected(void *arg, struct tcp_pcb *pcb, err_t err);
 static err_t tcp_client_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err);
+static void tcp_client_err(void *arg, err_t err);
 
 /*!
     \brief      called when a data is received on the tcp connection
@@ -100,12 +105,25 @@ static err_t tcp_client_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err
 
         /* send out the message */
         tcp_write(pcb, recev_packet->bytes, recev_packet->length, 1);
+
+        /* null-terminate the received data for logging */
+        if(recev_packet->length < MAX_BUF_SIZE) {
+            recev_packet->bytes[recev_packet->length] = '\0';
+        } else {
+            recev_packet->bytes[MAX_BUF_SIZE - 1] = '\0';
+        }
+
+        /* log the received data */
+        Log_info("TCP Received: %s", recev_packet->bytes);
+
         recev_packet->length = 0;
 
         pbuf_free(p);
 
     } else if(ERR_OK == err) {
-
+        /* connection closed by remote host */
+        Log_info("TCP connection closed by server");
+        g_tcp_connected = 0;
         mem_free(recev_packet);
         return tcp_close(pcb);
     }
@@ -123,12 +141,39 @@ static err_t tcp_client_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err
 */
 
 struct tcp_pcb *g_pcb;
+
+/*!
+    \brief      error callback function
+    \param[in]  arg: user supplied argument
+    \param[in]  err: error value
+    \param[out] none
+    \retval     none
+*/
+static void tcp_client_err(void *arg, err_t err)
+{
+    Log_info("TCP connection error: %d", err);
+    g_tcp_connected = 0;
+    g_pcb = NULL;
+    if(arg != NULL) {
+        mem_free(arg);
+    }
+}
+
 static err_t tcp_client_connected(void *arg, struct tcp_pcb *pcb, err_t err)
 {
-	  g_pcb = pcb;
-    tcp_arg(pcb, mem_calloc(sizeof(struct recev_packet), 1));
-    /* configure LwIP to use our call back functions */
-    tcp_recv(pcb, tcp_client_recv);
+    if(err == ERR_OK) {
+        g_pcb = pcb;
+        g_tcp_connected = 1;
+        Log_info("TCP connected to server successfully");
+
+        tcp_arg(pcb, mem_calloc(sizeof(struct recev_packet), 1));
+        /* configure LwIP to use our call back functions */
+        tcp_recv(pcb, tcp_client_recv);
+        tcp_err(pcb, tcp_client_err);
+    } else {
+        Log_info("TCP connection failed: %d", err);
+        g_tcp_connected = 0;
+    }
 
     return ERR_OK;
 }
@@ -147,27 +192,63 @@ void tcp_client_init(void)
     /* create a new TCP control block  */
     g_pcb = tcp_new();
 
-	  if( g_pcb != NULL)
-		{
-			err_t err;
-			err=tcp_connect(g_pcb, &ipaddr, IP_S_PORT, tcp_client_connected);
-			Log_info("err %d \n",err);
-		}
-		else
-		{
-			/* deallocate the pcb */
-			memp_free(MEMP_TCP_PCB, g_pcb);
-		}
+    if(g_pcb != NULL) {
+        err_t err;
 
+        /* set error callback before connecting */
+        tcp_err(g_pcb, tcp_client_err);
+
+        err = tcp_connect(g_pcb, &ipaddr, IP_S_PORT, tcp_client_connected);
+        Log_info("TCP connecting to %d.%d.%d.%d:%d, result: %d",
+                 IP_S_ADDR0, IP_S_ADDR1, IP_S_ADDR2, IP_S_ADDR3, IP_S_PORT, err);
+
+        if(err != ERR_OK) {
+            Log_info("TCP connect failed immediately: %d", err);
+            memp_free(MEMP_TCP_PCB, g_pcb);
+            g_pcb = NULL;
+        }
+    } else {
+        Log_info("TCP pcb allocation failed");
+    }
 }
 
 void tcp_client_task(void* pvParameters)
 {
+    char send_buf[64];
+    err_t err;
+    uint32_t period_ms = *(uint32_t*)pvParameters;
+
     TCPIP_Init();
+
+    /* Wait for network to be ready */
+    vTaskDelay(pdMS_TO_TICKS(2000));
+
+    /* Initialize TCP client connection */
+    tcp_client_init();
+
     while(1)
     {
-        tcp_client_init();
-        Log_info("hi");
-        vTaskDelay(pdMS_TO_TICKS(*(uint32_t*) pvParameters));
+        /* Check if connected and send test data */
+        if(g_tcp_connected && g_pcb != NULL) {
+            /* Prepare test data */
+            snprintf(send_buf, sizeof(send_buf), "Test message #%u\n", g_send_counter++);
+
+            /* Send data to server */
+            err = tcp_write(g_pcb, send_buf, strlen(send_buf), TCP_WRITE_FLAG_COPY);
+            if(err == ERR_OK) {
+                /* Trigger sending */
+                tcp_output(g_pcb);
+                Log_info("TCP sent: %s", send_buf);
+            } else {
+                Log_info("TCP send failed: %d", err);
+            }
+        } else if(!g_tcp_connected && g_pcb == NULL) {
+            /* Try to reconnect if disconnected */
+            Log_info("TCP not connected, attempting to reconnect...");
+            tcp_client_init();
+        }
+
+        /* Wait for next period */
+        vTaskDelay(pdMS_TO_TICKS(period_ms));
     }
 }
