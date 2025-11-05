@@ -103,9 +103,6 @@ static err_t tcp_client_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err
             }
         }
 
-        /* send out the message */
-        tcp_write(pcb, recev_packet->bytes, recev_packet->length, 1);
-
         /* null-terminate the received data for logging */
         if(recev_packet->length < MAX_BUF_SIZE) {
             recev_packet->bytes[recev_packet->length] = '\0';
