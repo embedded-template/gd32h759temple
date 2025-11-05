@@ -404,6 +404,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\tcp_client.c</FilePath>
             </File>
+            <File>
+              <FileName>gd32h7xx_it.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\gd32h7xx_it.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

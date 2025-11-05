@@ -2,6 +2,7 @@
 #include "bsp_lan8720a.h"
 #include "main.h"
 #include "netconf.h"
+#include "log.h"
 
 const uint8_t gd32_str[] = {"\r\n ############ Welcome GigaDevice ############\r\n"};
 static __IO uint32_t enet_init_status = 0;
@@ -387,7 +388,7 @@ void HardwareResetPhy(void)
     gpio_output_options_set(GPIOF, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_6);
 
     /* RESET PHY */
-    gpio_bit_reset(GPIOF,GPIO_PIN_6); 
+    gpio_bit_reset(GPIOF,GPIO_PIN_6);
 //	  vTaskDelay(40);
     gpio_bit_set(GPIOF,GPIO_PIN_6);
 //	  vTaskDelay(50);
@@ -473,11 +474,6 @@ void TCPIP_Init(void)
   	
     /* IP地址和端口可在main.h文件修改，或者使用DHCP服务自动获取IP
     (需要路由器支持)*/
-    #ifndef USE_DHCP
-        printf("本地IP和端口: %d.%d.%d.%d\n",IP_ADDR0,IP_ADDR1,IP_ADDR2,IP_ADDR3);
-        printf("远端IP和端口: %d.%d.%d.%d:%d\n",IP_S_ADDR0, IP_S_ADDR1,IP_S_ADDR2, IP_S_ADDR3,IP_S_PORT);
-    #else
-        printf("\n请稍后正在自动获取IP\n");
-    #endif    
+
 }
 

@@ -547,6 +547,9 @@ void sys_arch_netconn_sem_free(void)
 #if LWIP_FREERTOS_CHECK_CORE_LOCKING
 #if LWIP_TCPIP_CORE_LOCKING
 
+/** The global semaphore to lock the stack (defined in tcpip.c) */
+extern sys_mutex_t lock_tcpip_core;
+
 /** Flag the core lock held. A counter for recursive locks. */
 static u8_t lwip_core_lock_count;
 static TaskHandle_t lwip_core_lock_holder_thread;

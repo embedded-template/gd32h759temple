@@ -97,10 +97,10 @@ int main(void)
     uint8_t ucaRxBuf[256];
     uint16_t usRxCount = 0;
 
-    //nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
+    nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
     SCB_EnableICache();     // 使能 I-Cache
     SCB_EnableDCache();     // 使能 D-Cache
-
+    
     /* configure the MPU */
     mpu_config();
     //cache_enable();

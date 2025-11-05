@@ -167,6 +167,7 @@ void tcp_client_task(void* pvParameters)
     while(1)
     {
         tcp_client_init();
+        Log_info("hi");
         vTaskDelay(pdMS_TO_TICKS(*(uint32_t*) pvParameters));
     }
 }

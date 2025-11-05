@@ -19,7 +19,7 @@ typedef struct task_info_t
 #define PRIORITY_cli_task 3
 
 #define NAME_tcp_client_task "tcp_client"
-#define STACK_tcp_client_task 200
+#define STACK_tcp_client_task 1000
 #define PARAM_tcp_client_task 2000
 #define PRIORITY_tcp_client_task 3
 
