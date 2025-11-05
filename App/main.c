@@ -100,7 +100,7 @@ int main(void)
     nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
     SCB_EnableICache();     // 使能 I-Cache
     SCB_EnableDCache();     // 使能 D-Cache
-    
+
     /* configure the MPU */
     mpu_config();
     //cache_enable();

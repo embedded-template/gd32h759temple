@@ -340,7 +340,7 @@
               <MiscControls>-Wno-invalid-source-encoding -fno-finite-math-only</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\Firmware\CMSIS\GD\GD32H7xx\Include;..\Firmware\GD32H7xx_standard_peripheral\Include;..\freeRtos\kernel\include;..\freeRtos\kernel\portable\GCC\ARM_CM7\r0p1;..\User;..\Lib;..\Lib\ring_buffer;..\Lib\logging;..\Lib\cli;..\Driver;..\Lib\lwip_2_2_1\contrib\ports\GD32H7xx\arch;..\Lib\lwip_2_2_1\contrib\ports\GD32H7xx\FreeRTOS;..\Lib\lwip_2_2_1\src\include\lwip;..\Lib\lwip_2_2_1\src\include\netif;..\Lib\lwip_2_2_1\src\include\lwip\prot;..\Lib\lwip_2_2_1\src\include;..\Lib\lwip_2_2_1\contrib\ports\GD32H7xx</IncludePath>
+              <IncludePath>..\Firmware\CMSIS\GD\GD32H7xx\Include;..\Firmware\GD32H7xx_standard_peripheral\Include;..\freeRtos\kernel\include;..\freeRtos\kernel\portable\GCC\ARM_CM7\r0p1;..\User;..\Lib;..\Lib\ring_buffer;..\Lib\logging;..\Lib\cli;..\Driver;..\Lib\lwip_2_2_1\contrib\ports\GD32H7xx\arch;..\Lib\lwip_2_2_1\contrib\ports\GD32H7xx\FreeRTOS;..\Lib\lwip_2_2_1\src\include\lwip;..\Lib\lwip_2_2_1\src\include\netif;..\Lib\lwip_2_2_1\src\include\lwip\prot;..\Lib\lwip_2_2_1\src\include;..\Lib\lwip_2_2_1\contrib\ports\GD32H7xx;..\App\config;..\App\tcp;..\Driver\net;..\Driver\phy;..\App</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -382,32 +382,27 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>User</GroupName>
+          <GroupName>App</GroupName>
           <Files>
-            <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>bsp_lan8720a_rtos.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\bsp_lan8720a_rtos.c</FilePath>
-            </File>
-            <File>
-              <FileName>netconf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\netconf.c</FilePath>
-            </File>
-            <File>
-              <FileName>tcp_client.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\tcp_client.c</FilePath>
-            </File>
             <File>
               <FileName>gd32h7xx_it.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\User\gd32h7xx_it.c</FilePath>
+              <FilePath>..\App\gd32h7xx_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\main.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>App/tcp</GroupName>
+          <Files>
+            <File>
+              <FileName>tcp_client.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\tcp\tcp_client.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -423,6 +418,16 @@
               <FileName>module_can.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Driver\can\module_can.c</FilePath>
+            </File>
+            <File>
+              <FileName>netconf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\net\netconf.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_lan8720a_rtos.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Driver\phy\bsp_lan8720a_rtos.c</FilePath>
             </File>
           </Files>
         </Group>

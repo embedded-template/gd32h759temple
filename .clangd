@@ -1,30 +1,38 @@
 CompileFlags:
   Add: [
     # CMSIS include paths
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/Firmware/CMSIS/GD/GD32H7xx/Include,
+    -IC:./Firmware/CMSIS/GD/GD32H7xx/Include,
 
     # GD32H7xx standard peripheral library include paths
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/Firmware/GD32H7xx_standard_peripheral/Include,
+    -IC:./Firmware/GD32H7xx_standard_peripheral/Include,
 
     # FreeRTOS include paths
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/FreeRtos/kernel/include,
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/FreeRtos/kernel/portable/GCC/ARM_CM7/r0p1,
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/FreeRtos/kernel/portable/MemMang,
+    -IC:./FreeRtos/kernel/include,
+    -IC:./FreeRtos/kernel/portable/GCC/ARM_CM7/r0p1,
+    -IC:./FreeRtos/kernel/portable/MemMang,
 
     # Driver include paths
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/Driver,
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/Driver/can,
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/Driver/usart,
+    -IC:./Driver,
+    -IC:./Driver/can,
+    -IC:./Driver/usart,
 
     # Library include paths
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/Lib/cli,
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/Lib/converter,
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/Lib/logging,
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/Lib/ring_buffer,
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/Lib/utilities,
+    -IC:./Lib/cli,
+    -IC:./Lib/converter,
+    -IC:./Lib/logging,
+    -IC:./Lib/ring_buffer,
+    -IC:./Lib/utilities,
+
+    # lwIP include paths
+    -IC:./Lib/lwip_2_2_1/src/include,
+    -IC:./Lib/lwip_2_2_1/contrib/ports/GD32H7xx/FreeRTOS,
+    -IC:./Lib/lwip_2_2_1/contrib/ports/GD32H7xx/include,
 
     # User code include paths
-    -IC:/Users/24802/Documents/workspace/gd32h759temple/User,
+    -IC:./User,
+    -IC:./App,
+    -IC:./App/config,
+    -IC:./App/tcp,
 
     # Macro definitions for GD32H7XX
     -DGD32H7XX,
@@ -39,3 +47,19 @@ CompileFlags:
     # Disable MSVC secure warnings
     -D_CRT_SECURE_NO_WARNINGS,
   ]
+
+Diagnostics:
+  Suppress: [
+    "missing_include_dirs",
+    "pp_file_not_found",
+  ]
+
+Index:
+  Background: true
+  StandardLibrary: false
+
+# Add source file paths for proper code navigation
+InlayHints:
+  Enabled: true
+  ParameterNames: true
+  BlockEnd: true
