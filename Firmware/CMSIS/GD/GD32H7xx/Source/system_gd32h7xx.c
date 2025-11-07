@@ -33,7 +33,7 @@
 #define __LPIRC4M           (LPIRC4M_VALUE)          /* low power internal 4 MHz RC oscillator frequency */
 #define __SYS_OSC_CLK       (__IRC64M)               /* main oscillator frequency */
 
-#define VECT_TAB_OFFSET     (uint32_t)0x00           /* vector table base offset */
+#define VECT_TAB_OFFSET     (uint32_t)0x20000           /* vector table base offset */
 #define RCU_APB4EN_SYSCFG   (uint32_t)0x01           /* enable SYSCFG clk */
 
 /* select a system clock by uncommenting the following line */
