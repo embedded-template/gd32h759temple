@@ -25,33 +25,6 @@ void cache_enable(void)
     SCB_EnableDCache();
 }
 
-void check_reset_source(void)
-{
-    if (rcu_flag_get(RCU_FLAG_BORRST)) {
-        Log_info("BOR reset");
-    }
-    if (rcu_flag_get(RCU_FLAG_EPRST)) {
-        Log_info("External reset");
-    }
-    if (rcu_flag_get(RCU_FLAG_PORRST)) {
-        Log_info("Power-on reset");
-    }
-    if (rcu_flag_get(RCU_FLAG_SWRST)) {
-        Log_info("Software reset");
-    }
-    if (rcu_flag_get(RCU_FLAG_FWDGTRST)) {
-        Log_info("free watchdog timer reset flag");
-    }
-    if (rcu_flag_get(RCU_FLAG_WWDGTRST)) {
-        Log_info("Watchdog reset");
-    }
-    if (rcu_flag_get(RCU_FLAG_LPRST)) {
-        Log_info("Low-power reset");
-    }
-
-    rcu_all_reset_flag_clear();
-}
-
 void mpu_config(void)
 {
     mpu_region_init_struct mpu_init_struct;
@@ -106,7 +79,6 @@ int main(void)
     //cache_enable();
     console_init();
     module_can_init();
-    check_reset_source();
 
     for (int i = 0; i < TASK_NUM; i++)
     {
