@@ -1,5 +1,8 @@
 set shell := ["bash", "-c"]
 
+outdir := "../Output"
+logdir := "../Output/log"
+
 # Format C files in App and Driver directories with clang-format
 format:
     @command -v clang-format >/dev/null 2>&1 || { echo "Error: clang-format not found." >&2; exit 1; }
@@ -7,56 +10,60 @@ format:
     @find ../App ../Driver -type f \( -name "*.c" -o -name "*.h" \) -exec clang-format -i --style=file:../tools/code.clang-format {} \;
     @echo "Formatting complete!"
 
-# Build the Keil project and copy build log
+# Build the Keil project and copy outputs to Output directory
 build:
-    @rm -f ../Project/Output/gh32h759temple.build_log.htm ../build_log.htm
+    @rm -f ../Project/Output/gh32h759temple.build_log.htm
     UV4 -b ../Project/gd32h759temple.uvprojx -j0
     @for i in {1..60}; do if [ -f ../Project/Output/gh32h759temple.build_log.htm ] && grep -q 'Error(s)' ../Project/Output/gh32h759temple.build_log.htm; then break; fi; sleep 0.5; done
-    @cp ../Project/Output/gh32h759temple.build_log.htm ../build_log.htm
-    @echo "Build log copied to ../build_log.htm"
+    @mkdir -p {{logdir}}
+    @cp ../Project/Output/gh32h759temple.build_log.htm {{logdir}}/
+    @cp ../Project/Output/gh32h759temple.hex {{outdir}}/ 2>/dev/null || true
+    @cp ../Project/Output/gh32h759temple.axf {{outdir}}/ 2>/dev/null || true
+    @echo "Outputs copied to {{outdir}}/, build log saved to {{logdir}}/"
 
 # Rebuild (clean + build) the Keil project
 rebuild:
-    @rm -f ../Project/Output/gh32h759temple.build_log.htm ../build_log.htm
+    @rm -f ../Project/Output/gh32h759temple.build_log.htm
     UV4 -r ../Project/gd32h759temple.uvprojx -j0
     @for i in {1..60}; do if [ -f ../Project/Output/gh32h759temple.build_log.htm ] && grep -q 'Error(s)' ../Project/Output/gh32h759temple.build_log.htm; then break; fi; sleep 0.5; done
-    @cp ../Project/Output/gh32h759temple.build_log.htm ../build_log.htm
-    @echo "Build log copied to ../build_log.htm"
+    @mkdir -p {{logdir}}
+    @cp ../Project/Output/gh32h759temple.build_log.htm {{logdir}}/
+    @cp ../Project/Output/gh32h759temple.hex {{outdir}}/ 2>/dev/null || true
+    @cp ../Project/Output/gh32h759temple.axf {{outdir}}/ 2>/dev/null || true
+    @echo "Outputs copied to {{outdir}}/, build log saved to {{logdir}}/"
 
 # Show errors from the build log
 errors:
-    @if [ -f ../build_log.htm ]; then grep -i 'error' ../build_log.htm; else echo "No build_log.htm found."; fi
+    @if [ -f {{logdir}}/gh32h759temple.build_log.htm ]; then grep -i 'error' {{logdir}}/gh32h759temple.build_log.htm; else echo "No errors found or build log does not exist."; fi
 
 # Show warnings from the build log
 warnings:
-    @if [ -f ../build_log.htm ]; then grep -i 'warning' ../build_log.htm; else echo "No build_log.htm found."; fi
-
-# Output directory for signed binaries
-out_dir := "../Output"
+    @if [ -f {{logdir}}/gh32h759temple.build_log.htm ]; then grep -i 'warning' {{logdir}}/gh32h759temple.build_log.htm; else echo "No warnings found or build log does not exist."; fi
 
 # Convert .axf to .bin and sign with MCUBoot imgtool
 sign version="1.0.0":
-    @mkdir -p {{out_dir}}
+    @mkdir -p {{outdir}}
     @echo "Converting .axf to .bin..."
-    fromelf --bin --output {{out_dir}}/app_unsigned.bin ../Project/Output/gh32h759temple.axf
+    fromelf --bin --output {{outdir}}/app_unsigned.bin {{outdir}}/gh32h759temple.axf
     @echo "Signing with ECDSA-P256..."
-    python ../gd32h759boot/mcuboot/scripts/imgtool.py sign \
-        --key ../gd32h759boot/keys/ecdsa256.pem \
+    python ../../gd32h759boot/mcuboot/scripts/imgtool.py sign \
+        --key ../../gd32h759boot/keys/ecdsa256.pem \
         --align 8 \
         --header-size 0x200 \
+        --pad-header \
         --slot-size 0xA0000 \
         --pad \
         --version {{version}} \
-        {{out_dir}}/app_unsigned.bin \
-        {{out_dir}}/app_signed.bin
-    @echo "Signed binary: {{out_dir}}/app_signed.bin"
-    @ls -la {{out_dir}}/app_signed.bin
+        {{outdir}}/app_unsigned.bin \
+        {{outdir}}/app_signed.bin
+    @echo "Signed binary: {{outdir}}/app_signed.bin"
+    @ls -la {{outdir}}/app_signed.bin
 
 # Build and sign in one step
 release version="1.0.0": (build) (sign version)
 
 # Clean build output files
 clean:
-    @rm -f ../Project/Output/*.o ../Project/Output/*.d ../Project/Output/*.axf ../Project/Output/*.htm ../Project/Output/*.hex ../Project/Output/*.lnp ../build_log.htm
-    @rm -rf {{out_dir}}
+    @rm -f ../Project/Output/*.o ../Project/Output/*.d ../Project/Output/*.axf ../Project/Output/*.htm ../Project/Output/*.hex ../Project/Output/*.lnp
+    @rm -rf {{outdir}}
     @echo "Clean done."
