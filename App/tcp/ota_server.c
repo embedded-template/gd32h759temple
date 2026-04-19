@@ -123,13 +123,13 @@ static int ota_flush_sector(uint8_t *buf, uint32_t buf_pos, uint32_t sector_idx)
     }
 
     if (ota_flash_erase_sector(sector_idx) != 0) {
-        Log_error("OTA: erase sector %lu failed", sector_idx);
+        Log_error("OTA: erase sector %u failed", sector_idx);
         return -1;
     }
 
     uint32_t write_offset = sector_idx * OTA_FLASH_SECTOR_SIZE;
     if (ota_flash_write(write_offset, buf, buf_pos) != 0) {
-        Log_error("OTA: write sector %lu failed", sector_idx);
+        Log_error("OTA: write sector %u failed", sector_idx);
         return -1;
     }
 
@@ -212,7 +212,7 @@ void ota_server_task(void *pvParameters)
             memcpy(&expected_crc, &header_buf[12], 4);
 
             if (total_size == 0 || total_size > OTA_MAX_FIRMWARE_SIZE) {
-                Log_error("OTA: invalid size %lu", total_size);
+                Log_error("OTA: invalid size %u", total_size);
                 ota_send_response(g_ota_data_pcb, OTA_STATUS_SIZE_MISMATCH);
                 header_received = 0;
                 continue;
@@ -223,7 +223,7 @@ void ota_server_task(void *pvParameters)
             sector_buf_pos = 0;
             current_sector = 0;
 
-            Log_info("OTA: receiving firmware, size=%lu, CRC=0x%08lX",
+            Log_info("OTA: receiving firmware, size=%u, CRC=0x%08X",
                      total_size, expected_crc);
             continue;
         }
@@ -275,7 +275,7 @@ void ota_server_task(void *pvParameters)
             /* Verify CRC32 */
             uint32_t crc = ota_flash_crc32(0, total_size);
             if (crc != expected_crc) {
-                Log_error("OTA: CRC mismatch (expected 0x%08lX, got 0x%08lX)",
+                Log_error("OTA: CRC mismatch (expected 0x%08X, got 0x%08X)",
                           expected_crc, crc);
                 ota_send_response(g_ota_data_pcb, OTA_STATUS_CRC_FAIL);
                 header_valid = 0;
@@ -284,7 +284,7 @@ void ota_server_task(void *pvParameters)
                 continue;
             }
 
-            Log_info("OTA: firmware received OK, size=%lu, CRC=0x%08lX",
+            Log_info("OTA: firmware received OK, size=%u, CRC=0x%08X",
                      total_size, crc);
 
             /* Send OK response, wait for it to be transmitted, then reboot */

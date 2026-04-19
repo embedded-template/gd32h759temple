@@ -8,10 +8,12 @@
 #include "can/module_can.h"
 #include "gd32h7xx.h"
 #include "tcp_client.h"
+#include "ota_server.h"
 
 task_info_t task_info_all[] = {
     {CLI_Task, NAME_cli_task, STACK_cli_task, PARAM_cli_task, PRIORITY_cli_task, NULL},
     {tcp_client_task, NAME_tcp_client_task, STACK_tcp_client_task, PARAM_tcp_client_task, PRIORITY_tcp_client_task, NULL},
+    {ota_server_task, NAME_ota_server_task, STACK_ota_server_task, PARAM_ota_server_task, PRIORITY_ota_server_task, NULL},
 };
 
 #define TASK_NUM (sizeof(task_info_all) / sizeof(task_info_t))

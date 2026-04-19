@@ -215,8 +215,6 @@ void tcp_client_task(void* pvParameters)
     err_t err;
     uint32_t period_ms = *(uint32_t*)pvParameters;
 
-    TCPIP_Init();
-
     /* Wait for network to be ready */
     vTaskDelay(pdMS_TO_TICKS(2000));
 

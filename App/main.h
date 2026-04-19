@@ -69,6 +69,12 @@ typedef struct task_info_t
 #define RMII_MODE  // user have to provide the 50 MHz clock by soldering a 50 MHz oscillator
 //#define MII_MODE
 
+/* OTA server task configuration */
+#define NAME_ota_server_task  "ota_server"
+#define STACK_ota_server_task 2000
+#define PARAM_ota_server_task 0
+#define PRIORITY_ota_server_task 4
+
 /* clock the PHY from external 25MHz crystal (only for MII mode) */
 #ifdef  MII_MODE
 #define PHY_CLOCK_MCO

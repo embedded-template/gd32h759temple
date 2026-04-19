@@ -276,8 +276,8 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x8020000</StartAddress>
-                <Size>0x3a0000</Size>
+                <StartAddress>0x8020200</StartAddress>
+                <Size>0x9fe00</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -340,7 +340,7 @@
               <MiscControls>-Wno-invalid-source-encoding -fno-finite-math-only</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\Firmware\CMSIS\GD\GD32H7xx\Include;..\Firmware\GD32H7xx_standard_peripheral\Include;..\freeRtos\kernel\include;..\freeRtos\kernel\portable\GCC\ARM_CM7\r0p1;..\User;..\Lib;..\Lib\ring_buffer;..\Lib\logging;..\Lib\cli;..\Driver;..\Lib\lwip_2_2_1\contrib\ports\GD32H7xx\arch;..\Lib\lwip_2_2_1\contrib\ports\GD32H7xx\FreeRTOS;..\Lib\lwip_2_2_1\src\include\lwip;..\Lib\lwip_2_2_1\src\include\netif;..\Lib\lwip_2_2_1\src\include\lwip\prot;..\Lib\lwip_2_2_1\src\include;..\Lib\lwip_2_2_1\contrib\ports\GD32H7xx;..\App\config;..\App\tcp;..\Driver\net;..\Driver\phy;..\App</IncludePath>
+              <IncludePath>..\Firmware\CMSIS\GD\GD32H7xx\Include;..\Firmware\GD32H7xx_standard_peripheral\Include;..\freeRtos\kernel\include;..\freeRtos\kernel\portable\GCC\ARM_CM7\r0p1;..\User;..\Lib;..\Lib\ring_buffer;..\Lib\logging;..\Lib\cli;..\Driver;..\Lib\lwip_2_2_1\contrib\ports\GD32H7xx\arch;..\Lib\lwip_2_2_1\contrib\ports\GD32H7xx\FreeRTOS;..\Lib\lwip_2_2_1\src\include\lwip;..\Lib\lwip_2_2_1\src\include\netif;..\Lib\lwip_2_2_1\src\include\lwip\prot;..\Lib\lwip_2_2_1\src\include;..\Lib\lwip_2_2_1\contrib\ports\GD32H7xx;..\App\config;..\App\tcp;..\Driver\net;..\Driver\phy;..\App;..\App\ota</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -403,6 +403,21 @@
               <FileName>tcp_client.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\tcp\tcp_client.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_server.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\tcp\ota_server.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>App/ota</GroupName>
+          <Files>
+            <File>
+              <FileName>ota_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\ota\ota_flash.c</FilePath>
             </File>
           </Files>
         </Group>
